@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AdRetail Pro - Online Shopping</title>
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -39,7 +39,7 @@
         <div class="slider-container">
             <!-- Slider images will be handled by JavaScript -->
             <div class="slide active">
-                <img src="{{ asset('images/banner1.jpg') }}" alt="Special Offer">
+                <img src="https://ng.jumia.is/cms/0-1-weekly-cps/0-2024/Week-4-SDD/712x384.jpg" alt="Special Offer">
                 <div class="slide-content">
                     <h2>Flash Sale</h2>
                     <p>Up to 70% off on selected items</p>
@@ -138,16 +138,16 @@
                 <h3>Download Our App</h3>
                 <div class="app-buttons">
                     <a href="#" class="app-button">
-                        <img src="{{ asset('images/app-store.png') }}" alt="App Store">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store">
                     </a>
                     <a href="#" class="app-button">
-                        <img src="{{ asset('images/play-store.png') }}" alt="Play Store">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store">
                     </a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <script src="{{ asset('js/script.js') }}"></script>
+    <script src="{{ asset('script.js') }}"></script>
 </body>
 </html>
