@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\CartItem;
+use App\Models\OrderItem;
+use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
@@ -12,13 +13,14 @@ use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
-    public function  verifyPayment(Request $request) {   
+    public function verifyPayment(Request $request) {   
         $reference = $request->input('res');    
+        
         // Verify payment with Paystack API
         $curl = curl_init();
     
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://api.paystack.co/transaction/verify/" . $reference,
+            CURLOPT_URL => "https://api.paystack.co/transaction/verify/" . rawurlencode($reference),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -26,7 +28,7 @@ class PaymentController extends Controller
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
             CURLOPT_HTTPHEADER => array(
-                "Authorization: Bearer pk_test_f24eee9b0d2330b8bf2323d218e1177d6fb5ea9f",
+                "Authorization: Bearer sk_test_7f69ca908419138bf54aaf3c24d838b3a126119f",
                 "Cache-Control: no-cache",
             ),
         ));
@@ -37,71 +39,94 @@ class PaymentController extends Controller
         curl_close($curl);
         
         if ($err) {
-            return response()->json(['error' => "cURL Error #: $err"]);
-        } else {
-            $responseData = json_decode($response);
-            
-            if ($responseData->status && $responseData->data->status === 'success') {
-                // Create order from cart
-                try {
-                    DB::beginTransaction();
-                    
-                    $cartItems = CartItem::where('user_id', auth()->id())->with('product')->get();
-                    
-                    // Calculate total amount
-                    $totalAmount = $cartItems->sum(function($item) {
-                        $itemTotal = $item->quantity * ($item->product->discount > 0 
-                            ? $item->product->price * (1 - $item->product->discount / 100)
-                            : $item->product->price);
-                        return $itemTotal + ($itemTotal * 0.05); // Including 5% tax
-                    });
-
-                    // Create order
-                    $order = Order::create([
-                        'user_id' => auth()->id(),
-                        'total_amount' => $totalAmount,
-                        'status' => 'paid'
-                    ]);
-
-                    // Create order items
-                    foreach ($cartItems as $cartItem) {
-                        $order->items()->create([
-                            'product_id' => $cartItem->product_id,
-                            'quantity' => $cartItem->quantity,
-                            'price' => $cartItem->product->discount > 0 
-                                ? $cartItem->product->price * (1 - $cartItem->product->discount / 100)
-                                : $cartItem->product->price
-                        ]);
-                    }
-
-                    // Clear the cart
-                    CartItem::where('user_id', auth()->id())->delete();
-
-                    DB::commit();
-                    
-                    return response()->json([
-                        'status' => 'success',
-                        'message' => 'Payment verified and order created successfully',
-                        'data' => $responseData->data,
-                        'order_id' => $order->id
-                    ]);
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    Log::error('Order creation failed: ' . $e->getMessage());
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Failed to create order',
-                        'error' => $e->getMessage()
-                    ], 500);
-                }
-            }
-            
+            Log::error('Paystack cURL Error: ' . $err);
             return response()->json([
                 'status' => 'error',
-                'message' => 'Payment verification failed',
-                'data' => $responseData
-            ]);
+                'message' => 'Failed to verify payment'
+            ], 500);
         }
+
+        $responseData = json_decode($response);
+        
+        if (!$responseData) {
+            Log::error('Invalid JSON response from Paystack');
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid response from payment provider'
+            ], 500);
+        }
+        
+        if ($responseData->status) {
+            try {
+                DB::beginTransaction();
+                
+                // Get cart items
+                $cartItems = Cart::where('user_id', Auth::id())->with('product')->get();
+                
+                if ($cartItems->isEmpty()) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Cart is empty'
+                    ], 400);
+                }
+
+                // Calculate total amount
+                $totalAmount = $cartItems->sum(function($item) {
+                    $itemTotal = $item->quantity * ($item->product->discount > 0 
+                        ? $item->product->price * (1 - $item->product->discount / 100)
+                        : $item->product->price);
+                    return $itemTotal + ($itemTotal * 0.05); // Including 5% tax
+                });
+
+                // Create order
+                $order = new Order();
+                $order->user_id = Auth::id();
+                $order->total_amount = $totalAmount;
+                $order->status = 'completed';
+                $order->save();
+
+                // Create order items
+                foreach ($cartItems as $cartItem) {
+                    $price = $cartItem->product->discount > 0 
+                        ? $cartItem->product->price * (1 - $cartItem->product->discount / 100)
+                        : $cartItem->product->price;
+
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $cartItem->product_id,
+                        'quantity' => $cartItem->quantity,
+                        'price' => $price
+                    ]);
+                }
+
+                // Clear the cart
+                Cart::where('user_id', Auth::id())->delete();
+
+                DB::commit();
+                
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Payment verified and order created successfully',
+                    'data' => $responseData->data,
+                    'order_id' => $order->id
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Order creation failed: ' . $e->getMessage());
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to create order: ' . $e->getMessage()
+                ], 500);
+            }
+        }
+        
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Payment verification failed',
+            'data' => $responseData
+        ], 400);
     }
 
     public function makePaymentStore(Request $request)

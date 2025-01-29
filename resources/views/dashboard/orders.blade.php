@@ -13,7 +13,7 @@
         <div class="nav-container">
             <div class="logo">AdRetail Pro</div>
             <div class="user-menu">
-                <span class="user-name">Joseph Ezeokeke</span>
+                <span class="user-name">{{auth()->user()->name}}</span>
                 <img src="https://ui-avatars.com/api/?name=Joseph+Ezeokeke&background=4F46E5&color=fff&size=40&rounded=true&bold=true" alt="Joseph Ezeokeke" class="profile-img">
                 <div class="dropdown-menu">
                     <a href="settings.html?tab=general#profile"><i class="fas fa-user"></i> Profile</a>
@@ -65,12 +65,7 @@
                         <span>Customers</span>
                     </a>
                 </li>
-                <li>
-                    <a href="settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
+                
             </ul>
         </aside>
 

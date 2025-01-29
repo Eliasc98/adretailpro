@@ -6,6 +6,227 @@
     <title>My Orders - AdRetail Pro</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            min-width: 250px;
+            background: #fff;
+            border-right: 1px solid #eee;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .nav-container {
+            background: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4F46E5;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .profile-img {
+            cursor: pointer;
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+        }
+
+        .content-header h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .orders-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .order-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .order-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .order-status.completed {
+            background: #e6f4ea;
+            color: #1e7e34;
+        }
+
+        .order-items {
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            color: #666;
+        }
+
+        .item-quantity {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .order-total {
+            text-align: right;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .total-label {
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .total-amount {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .no-orders i {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: #4F46E5;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -13,12 +234,18 @@
         <div class="nav-container">
             <div class="logo">AdRetail Pro</div>
             <div class="user-menu">
-                <span class="user-name">John Doe</span>
-                <img src="https://ui-avatars.com/api/?name=John+Doe&background=4F46E5&color=fff&size=40&rounded=true&bold=true" alt="John Doe" class="profile-img">
+                <span class="user-name">{{auth()->user()->name}}</span>
+                <img src="https://ui-avatars.com/api/?name={{auth()->user()->name}}&background=4F46E5&color=fff&size=40&rounded=true&bold=true" alt="{{auth()->user()->name}}" class="profile-img">
                 <div class="dropdown-menu">
-                    <a href="customer-settings.html"><i class="fas fa-user"></i> Profile</a>
-                    <a href="customer-settings.html"><i class="fas fa-cog"></i> Settings</a>
-                    <a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="{{route('profile.edit')}}"><i class="fas fa-user"></i> Profile</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-dropdown-link :href="route('logout')"
+                                onclick="event.preventDefault();
+                                            this.closest('form').submit();">
+                            {{ __('Log Out') }}
+                        </x-dropdown-link>
+                    </form>
                 </div>
             </div>
         </div>
@@ -30,258 +257,90 @@
         <aside class="dashboard-sidebar">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="buyer-dashboard.html">
+                    <a href="/">
                         <i class="fas fa-home"></i>
                         <span>Home</span>
                     </a>
                 </li>
-              
+               
                 <li>
-                    <a href="cart.html">
+                    <a href="{{ route('cart.index') }}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>My Cart</span>
-                        <span class="cart-count">3</span>
+                        <span class="cart-count">({{ $cartItems->count() }})</span>
                     </a>
                 </li>
                 <li class="active">
-                    <a href="customer-order.html">
+                    <a href="{{ route('orders') }}">
                         <i class="fas fa-box"></i>
                         <span>My Orders</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="customer-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
                     </a>
                 </li>
             </ul>
         </aside>
 
         <!-- Main Content -->
-        <main class="dashboard-main">
-            <!-- Order Stats -->
-            <div class="order-stats">
-                <div class="stat-card">
-                    <div class="stat-icon processing">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">Processing</span>
-                        <span class="stat-value">2</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon shipped">
-                        <i class="fas fa-shipping-fast"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">Shipped</span>
-                        <span class="stat-value">1</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon delivered">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">Delivered</span>
-                        <span class="stat-value">15</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon total">
-                        <i class="fas fa-shopping-bag"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">Total Orders</span>
-                        <span class="stat-value">18</span>
-                    </div>
-                </div>
+        <main class="main-content">
+            <div class="content-header">
+                <h1>My Orders</h1>
+                <p>View and track your orders</p>
             </div>
 
-            <div class="page-header">
-                <div class="header-content">
-                    <h1>My Orders</h1>
-                    <p class="text-muted">Track and manage your orders</p>
-                </div>
-                <div class="order-filters">
-                    <div class="search-orders">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search by order ID or product name..." class="search-input">
-                    </div>
-                    <div class="filter-group">
-                        <select class="filter-select">
-                            <option value="all">All Orders</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                        <select class="filter-select">
-                            <option value="recent">Most Recent</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="highest">Highest Amount</option>
-                            <option value="lowest">Lowest Amount</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Orders List -->
             <div class="orders-container">
-                <!-- Order Item -->
-                <div class="order-card">
-                    <div class="order-header">
-                        <div class="order-info">
-                            <div class="order-id-group">
-                                <span class="order-id">Order #ORD-2025-001</span>
-                                <button class="btn-copy" title="Copy Order ID">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                            </div>
-                            <div class="order-meta">
-                                <span class="order-date"><i class="far fa-calendar"></i> January 28, 2025</span>
-                                <span class="order-time"><i class="far fa-clock"></i> 10:30 AM</span>
-                            </div>
-                        </div>
-                        <div class="order-status processing">
-                            <i class="fas fa-clock"></i>
-                            Processing
-                        </div>
+                @if($orders->isEmpty())
+                    <div class="no-orders">
+                        <i class="fas fa-shopping-bag"></i>
+                        <p>You haven't placed any orders yet</p>
+                        <a href="/" class="btn-primary">Start Shopping</a>
                     </div>
-                    <div class="order-progress">
-                        <div class="progress-step completed">
-                            <i class="fas fa-check"></i>
-                            <span>Order Placed</span>
-                        </div>
-                        <div class="progress-line active"></div>
-                        <div class="progress-step active">
-                            <i class="fas fa-cog"></i>
-                            <span>Processing</span>
-                        </div>
-                        <div class="progress-line"></div>
-                        <div class="progress-step">
-                            <i class="fas fa-truck"></i>
-                            <span>Shipped</span>
-                        </div>
-                        <div class="progress-line"></div>
-                        <div class="progress-step">
-                            <i class="fas fa-home"></i>
-                            <span>Delivered</span>
-                        </div>
-                    </div>
-                    <div class="order-items">
-                        <div class="order-item">
-                            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&q=80" alt="Premium Headphones">
-                            <div class="item-details">
-                                <h3>Premium Headphones</h3>
-                                <div class="item-meta-group">
-                                    <span class="item-meta"><i class="fas fa-box"></i> Quantity: 1</span>
-                                    <span class="item-meta"><i class="fas fa-palette"></i> Color: Black</span>
-                                    <span class="item-meta"><i class="fas fa-tag"></i> SKU: HDX-100</span>
+                @else
+                    @foreach($orders as $order)
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div class="order-info">
+                                    <h3>Order #{{ $order->id }}</h3>
+                                    <span class="order-date">{{ $order->created_at->format('M d, Y') }}</span>
                                 </div>
-                                <div class="item-price-group">
-                                    <span class="item-price">₦119,996</span>
-                                    <span class="price-saved">Saved ₦20,000</span>
+                                <div class="order-status {{ $order->status }}">
+                                    {{ ucfirst($order->status) }}
                                 </div>
                             </div>
-                            <div class="item-actions">
-                                <button class="btn-outline btn-sm">
-                                    <i class="fas fa-redo"></i>
-                                    Buy Again
-                                </button>
-                                <button class="btn-text btn-sm">
-                                    <i class="fas fa-star"></i>
-                                    Rate Product
-                                </button>
+                            <div class="order-items">
+                                @foreach($order->items as $item)
+                                    <div class="order-item">
+                                        <img src="{{ $item->product->image }}" alt="{{ $item->product->name }}" class="item-image">
+                                        <div class="item-details">
+                                            <div class="item-name">{{ $item->product->name }}</div>
+                                            <div class="item-price">₦{{ number_format($item->price, 2) }}</div>
+                                            <div class="item-quantity">Quantity: {{ $item->quantity }}</div>
+                                        </div>
+                                        <div class="item-total">
+                                            ₦{{ number_format($item->price * $item->quantity, 2) }}
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="order-total">
+                                <span class="total-label">Total Amount:</span>
+                                <span class="total-amount">₦{{ number_format($order->total_amount, 2) }}</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="order-details">
-                        <div class="detail-group">
-                            <h4>Shipping Address</h4>
-                            <p>123 Main Street, Apartment 4B</p>
-                            <p>Lagos, Nigeria</p>
-                            <p>Phone: +234 123 456 7890</p>
-                        </div>
-                        <div class="detail-group">
-                            <h4>Payment Details</h4>
-                            <p><i class="fab fa-cc-mastercard"></i> Card ending in 4242</p>
-                            <p>Transaction ID: TXN123456789</p>
-                        </div>
-                    </div>
-                    <div class="order-footer">
-                        <div class="order-summary">
-                            <div class="summary-row">
-                                <span>Subtotal:</span>
-                                <span>₦119,996</span>
-                            </div>
-                            <div class="summary-row">
-                                <span>Shipping:</span>
-                                <span class="text-success">Free</span>
-                            </div>
-                            <div class="summary-row">
-                                <span>Discount:</span>
-                                <span class="text-success">-₦20,000</span>
-                            </div>
-                            <div class="summary-row total">
-                                <span>Total:</span>
-                                <span>₦99,996</span>
-                            </div>
-                        </div>
-                        <div class="order-actions">
-                            <button class="btn-outline">
-                                <i class="fas fa-headset"></i>
-                                Need Help?
-                            </button>
-                            <button class="btn-outline">
-                                <i class="fas fa-file-alt"></i>
-                                View Invoice
-                            </button>
-                            <button class="btn-primary">
-                                <i class="fas fa-truck"></i>
-                                Track Order
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Similar order cards can be added here -->
+                    @endforeach
+                @endif
             </div>
         </main>
     </div>
 
     <script>
-        // Initialize dropdown menu
+        // Toggle user menu
         document.querySelector('.profile-img').addEventListener('click', function() {
-            document.querySelector('.dropdown-menu').classList.toggle('show');
+            const menu = document.querySelector('.dropdown-menu');
+            menu.classList.toggle('active');
         });
 
-        // Copy Order ID
-        document.querySelectorAll('.btn-copy').forEach(button => {
-            button.addEventListener('click', function() {
-                const orderId = this.closest('.order-id-group').querySelector('.order-id').textContent;
-                navigator.clipboard.writeText(orderId).then(() => {
-                    // Show success tooltip
-                    button.setAttribute('title', 'Copied!');
-                    setTimeout(() => button.setAttribute('title', 'Copy Order ID'), 2000);
-                });
-            });
-        });
-
-        // Filter orders
-        document.querySelectorAll('.filter-select').forEach(select => {
-            select.addEventListener('change', function() {
-                console.log('Filtering orders by:', this.value);
-                // Add filter logic here
-            });
-        });
-
-        // Search orders
-        document.querySelector('.search-input').addEventListener('input', function() {
-            console.log('Searching orders:', this.value);
-            // Add search logic here
+        // Mobile sidebar toggle
+        document.querySelector('.mobile-menu-btn')?.addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
         });
     </script>
 </body>

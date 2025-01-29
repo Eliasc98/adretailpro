@@ -30,32 +30,27 @@
         <!-- Sidebar -->
         <aside class="dashboard-sidebar">
             <ul class="sidebar-menu">
-                <li>
-                    <a href="buyer-dashboard.html">
+                <li class="active">
+                    <a href="/">
                         <i class="fas fa-home"></i>
                         <span>Home</span>
                     </a>
                 </li>
-           
-                <li class="active">
-                    <a href="cart.html">
+               
+                <li>
+                    <a href="{{ route('cart.index') }}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>My Cart</span>
-                        <span class="cart-count">3</span>
+                        <span class="cart-count">({{ $cartItems->count() }})</span>
                     </a>
                 </li>
                 <li>
-                    <a href="customer-order.html">
+                    <a href="{{ route('orders') }}">
                         <i class="fas fa-box"></i>
                         <span>My Orders</span>
                     </a>
                 </li>
-                <li>
-                    <a href="customer-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
+                
             </ul>
         </aside>
 
@@ -221,58 +216,47 @@
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <script>
         function payWithPaystack(amount, email) {
-            console.log('Initiating payment...');
-
-            let handler = PaystackPop.setup({
-                key: 'pk_test_f24eee9b0d2330b8bf2323d218e1177d6fb5ea9f',
-                email: email,
-                amount: amount * 100,
-                ref: '' + Math.floor((Math.random() * 1000000000) + 1),
-                callback: function(response) {
-                    console.log('Payment completed. Verifying payment...');
-
-                    var params = new URLSearchParams({
-                        'amount': amount,
-                        'email': email,
-                        'res': response.reference,
-                    });
-
-                    fetch("{{URL('verify-payment')}}?" + params.toString(), {
-                        method: "GET",
-                        headers: {
-                            'Accept': 'application/json',
-                        },
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(result => {
-                        console.log('Verification result:', result);
-                        
-                        if (result.status === 'success') {
-                            // Show success message
-                            alert('Payment successful! Your order has been placed.');
-                            // Redirect to orders page
-                            window.location.href = "{{ route('orders') }}";
-                        } else {
-                            alert('Payment verification failed: ' + result.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.log('Verification error:', error);
-                        alert('An error occurred while verifying your payment. Please contact support.');
-                    });
+    let handler = PaystackPop.setup({
+        key: 'pk_test_f24eee9b0d2330b8bf2323d218e1177d6fb5ea9f',
+        email: email,
+        amount: amount * 100,
+        ref: '' + Math.floor((Math.random() * 1000000000) + 1),
+        callback: function(response) {
+            fetch("{{ route('verify-payment') }}", {
+                method: "POST",  // Change to POST
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Ensure CSRF token is included
                 },
-                onClose: function() {
-                    console.log('Payment window closed');
+                body: JSON.stringify({
+                    amount: amount,
+                    email: email,
+                    res: response.reference
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    alert('Payment successful! Your order has been placed.');
+                    window.location.href = "{{ route('orders') }}";
+                } else {
+                    alert(result.message || 'Payment verification failed. Please try again.');
                 }
+            })
+            .catch(error => {
+                console.error('Verification error:', error);
+                alert('An error occurred while verifying your payment.');
             });
-
-            handler.openIframe();
+        },
+        onClose: function() {
+            console.log('Payment window closed');
         }
+    });
+
+    handler.openIframe();
+}
+
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

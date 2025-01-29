@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Product;
 use App\Models\Order;
@@ -93,16 +94,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/{cart}/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
 
     // Payment
-    Route::get('/checkout-payment', [PaymentController::class, 'verifyPayment'])->name('verify-payment');
+    Route::post('/verify-payment', [PaymentController::class, 'verifyPayment'])->name('verify-payment');
     Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
     Route::post('/payment/initialize', [PaymentController::class, 'initializePayment'])->name('payment.initialize');
     Route::get('/payment/callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
 
     // Orders
-    Route::get('/orders', function () {
-        $orders = auth()->user()->orders()->with(['items.product'])->get();
-        return view('dashboard.customer-order', compact('orders'));
-    })->name('orders');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
