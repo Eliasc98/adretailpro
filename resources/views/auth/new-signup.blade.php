@@ -42,28 +42,21 @@
 
                 <!-- Signup Form -->
                 <form id="signup-form" class="signup-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="first-name">First Name</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-user"></i>
-                                <input type="text" id="first-name" name="first-name" placeholder="John" required>
-                            </div>
+                   
+                    <div class="form-group">
+                        <label for="first-name">Full Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="first-name" name="name" placeholder="John Paul" :value="old('name')" required autofocus autocomplete="name">
                         </div>
-                        <div class="form-group">
-                            <label for="last-name">Last Name</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-user"></i>
-                                <input type="text" id="last-name" name="last-name" placeholder="Doe" required>
-                            </div>
-                        </div>
-                    </div>
+                    </div>                        
+                    
 
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <div class="input-with-icon">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                            <input type="email" id="email" name="email" placeholder="john@example.com" :value="old('email')" required autocomplete="username">
                         </div>
                     </div>
 
@@ -71,7 +64,7 @@
                         <label for="phone">Phone Number</label>
                         <div class="input-with-icon">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" id="phone" name="phone" placeholder="+234 XXX XXX XXXX" required>
+                            <input type="tel" id="phone" name="phone" placeholder="+234 XXX XXX XXXX" :value="old('phone')" required autocomplete="username">
                         </div>
                     </div>
 
@@ -108,7 +101,7 @@
                             <label for="product-categories">Product Categories</label>
                             <div class="input-with-icon">
                 
-                                <select id="product-categories" name="product-categories" multiple required>
+                                <select id="product-categories" name="product-categories" required>
                                     <option value="fashion">Fashion & Apparel</option>
                                     <option value="electronics">Electronics & Gadgets</option>
                                     <option value="home">Home & Garden</option>
@@ -125,7 +118,7 @@
                                     <option value="digital_goods">Digital Goods</option>
                                     <option value="other">Other Categories</option>
                                 </select>
-                                <small class="field-hint">Hold Ctrl/Cmd to select multiple categories that best describe your products</small>
+                                <!-- <small class="field-hint">Hold Ctrl/Cmd to select multiple categories that best describe your products</small> -->
                             </div>
                         </div>
 
@@ -193,25 +186,11 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </form>
-
-                <div class="login-divider">
-                    <span>OR</span>
-                </div>
-
-                <div class="social-login">
-                    <button class="social-btn google">
-                        <i class="fab fa-google"></i>
-                        <span>Sign up with Google</span>
-                    </button>
-                    <button class="social-btn facebook">
-                        <i class="fab fa-facebook-f"></i>
-                        <span>Sign up with Facebook</span>
-                    </button>
-                </div>
+                
 
                 <p class="login-prompt">
                     Already have an account? 
-                    <a href="login.html" class="login-link">Login here</a>
+                    <a href="{{asset('login')}}" class="login-link">Login here</a>
                 </p>
             </div>
         </div>
