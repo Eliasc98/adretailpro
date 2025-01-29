@@ -6,6 +6,74 @@
     <title>Sign Up - AdRetail Pro</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+      .text-danger, .text-danger1 {
+        color: red;
+      }
+
+      .alert1, .alert2 {
+        color: red;
+        box-shadow: 0px 0px 5px 0px grey;
+        background: rgba(247, 186, 204, 0.67);
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px auto;
+      }
+
+      .alert-danger {
+        background: rgba(245, 40, 145, 0.8);
+        color: red;
+        border-radius: 10px;
+        border: 1px solid red;
+        width: 100%;
+        margin: 20px auto;
+        padding: 20px;
+      }
+
+      #error_div {
+        background: rgba(245, 40, 145, 0.8);
+        color: red;
+        border-radius: 10px;
+        border: 2px solid red;
+        width: 100%;
+        margin: 20px auto;
+        padding: 20px;
+        display: none;
+      }
+
+      .list-container {
+
+        background: rgba(247, 186, 204, 0.8);
+        border-radius: 5px;
+        padding: 10px;
+      }
+
+      .list-container > li {
+        line-height: 1.5;
+        list-style: none;
+      }
+
+      select {
+        appearance: none; 
+        border: none;
+        outline: none;
+        background: transparent;
+        border-bottom: 1px solid #cdcdcd;
+        color: #959595;
+        font-size: 14px;
+        width: 100%;
+        padding: 5px 10px; 
+        /* resize: none; */
+        /* max-height: 10px; */
+        /* padding: -4px 0; */
+        margin-top: 20px !important;
+        /* background: none; */
+        border-top: 0;
+        /* overflow: hidden; */
+        transition: border .2s;
+        -webkit-transition: border .2s;
+      }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -41,7 +109,22 @@
                 </div>
 
                 <!-- Signup Form -->
-                <form id="signup-form" class="signup-form">
+                <form id="signup-form" class="signup-form" method="POST" action="{{ route('register') }}">
+                    @csrf
+
+                    @if(session('login_status'))
+                        <div class="alert1">{{session('login_status')}}</div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="text-danger1">
+                        <ul class="list-container">
+                            @foreach ($errors->all() as $error)
+                            <li class="list">{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        </div>
+                    @endif
                    
                     <div class="form-group">
                         <label for="first-name">Full Name</label>
@@ -49,6 +132,7 @@
                             <i class="fas fa-user"></i>
                             <input type="text" id="first-name" name="name" placeholder="John Paul" :value="old('name')" required autofocus autocomplete="name">
                         </div>
+                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>                        
                     
 
@@ -58,6 +142,7 @@
                             <i class="fas fa-envelope"></i>
                             <input type="email" id="email" name="email" placeholder="john@example.com" :value="old('email')" required autocomplete="username">
                         </div>
+                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
                     <div class="form-group">
@@ -74,7 +159,7 @@
                             <label for="business-name">Business Name</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-building"></i>
-                                <input type="text" id="business-name" name="business_name" placeholder="Enter your business name" required>
+                                <input type="text" id="business-name" name="business_name" placeholder="Enter your business name">
                             </div>
                         </div>
 
@@ -82,7 +167,7 @@
                             <label for="business-type">Business Type</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-briefcase"></i>
-                                <select id="business-type" name="business_type" required>
+                                <select id="business-type" name="business_type">
                                     <option value="">Select Business Type</option>
                                     <option value="retail">Retail Store</option>
                                     <option value="wholesale">Wholesale Business</option>
@@ -104,7 +189,7 @@
                             <div class="input-with-icon">
                                
                                 <textarea id="business-description" name="business_description" 
-                                    placeholder="Tell us about your business, products, and what makes you unique..." required></textarea>
+                                    placeholder="Tell us about your business, products, and what makes you unique..."></textarea>
                                 <small class="field-hint">Provide a clear description of your business and products to help customers understand your offerings</small>
                             </div>
                         </div>
@@ -114,7 +199,7 @@
                             <div class="input-with-icon">
                                 <i class="fas fa-location-dot"></i>
                                 <textarea id="business-address" name="business_address" 
-                                    placeholder="Enter your complete business address..." required></textarea>
+                                    placeholder="Enter your complete business address..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -129,16 +214,18 @@
                                     
                                 </button>
                             </div>
+                            <!-- <x-input-error :messages="$errors->get('password')" class="mt-2" /> -->
                         </div>
                         <div class="form-group">
                             <label for="confirm-password">Confirm Password</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-lock"></i>
-                                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm password" required>
+                                <input type="password" id="confirm-password" name="password_confirmation" placeholder="Confirm password" required>
                                 <button type="button" class="toggle-password">
                                    
                                 </button>
                             </div>
+                            <!-- <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" /> -->
                         </div>
                     </div>
 
@@ -174,6 +261,39 @@
     </section>
 
     <script>
+    // JavaScript for timer feature
+    setTimeout(function() {
+      const dangerElements = document.getElementByClassName('text-danger');
+      
+        dangerElements[i].style.display = 'none';
+      
+    }, 10000);
+
+    setTimeout(function() {
+      const dangerElements = document.getElementByClassName('text-danger1');
+      
+        dangerElements[i].style.display = 'none';
+      
+    }, 10000);
+
+
+    setTimeout(function() {
+      const alertElements = document.getElementByClassName('alert1');
+     
+        alertElements.style.display = 'none';
+      
+    }, 10000);
+
+    setTimeout(function() {
+      const alertElement2 = document.getElementByClassName('alert2');
+     
+        alertElement2.style.display = 'none';
+      
+    }, 10000);
+
+</script>
+
+    <script>
         // Toggle password visibility
         document.querySelectorAll('.toggle-password').forEach(button => {
             button.addEventListener('click', function() {
@@ -207,20 +327,7 @@
             });
         });
 
-        // Form validation
-        document.getElementById('signup-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (password !== confirmPassword) {
-                alert('Passwords do not match!');
-                return;
-            }
-
-            // Here you would typically send the form data to your server
-            alert('Account created successfully!');
-        });
+       
     </script>
 </body>
 </html>

@@ -117,19 +117,7 @@
             });
         });
 
-        // Form submission
-        document.querySelector('.login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const userType = document.querySelector('.type-btn.active').getAttribute('data-type');
-            
-            // For demo purposes, we'll redirect without actual authentication
-            if (userType === 'seller') {
-                window.location.href = 'seller-dashboard.html';
-            } else {
-                // Redirect buyers to their dashboard or homepage
-                window.location.href = 'index.html';
-            }
-        });
+        
     </script>
 </body>
 </html>

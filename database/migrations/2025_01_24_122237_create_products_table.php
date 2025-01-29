@@ -17,8 +17,12 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->decimal('price', 10, 2);
-            $table->integer('stock');
+            $table->integer('stock')->default(0);
             $table->string('image')->nullable();
+            $table->boolean('featured')->default(false);
+            $table->string('status')->default('active');
+            $table->decimal('discount', 5, 2)->default(0);
+            $table->decimal('rating', 3, 2)->default(0);
             $table->timestamps();
         });
     }

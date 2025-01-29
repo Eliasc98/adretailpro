@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -55,13 +56,27 @@ class User extends Authenticatable
         ];
     }    
 
-    public function orders()
+    /**
+     * Get the products that belong to the user (for sellers/admin).
+     */
+    public function products(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Product::class);
     }
 
-    public function cartItems()
+    /**
+     * Get the cart items that belong to the user.
+     */
+    public function cartItems(): HasMany
     {
-        return $this->hasMany(Cart::class);
+        return $this->hasMany(CartItem::class);
+    }
+
+    /**
+     * Get the orders that belong to the user.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 }

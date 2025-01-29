@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <!-- Navigation -->
@@ -14,12 +15,20 @@
         <div class="nav-container">
             <div class="logo">AdRetail Pro</div>
             <div class="user-menu">
-                <span class="user-name">John Doe</span>
-                <img src="https://ui-avatars.com/api/?name=John+Doe&background=4F46E5&color=fff&size=40&rounded=true&bold=true" alt="John Doe" class="profile-img">
+                <span class="user-name">{{auth()->user()->name}}</span>
+                <img src="https://ui-avatars.com/api/?name={{auth()->user()->name}}&background=4F46E5&color=fff&size=40&rounded=true&bold=true" alt="{{auth()->user()->name}}" class="profile-img">
                 <div class="dropdown-menu">
-                    <a href="customer-settings.html"><i class="fas fa-user"></i> Profile</a>
-                    <a href="customer-settings.html"><i class="fas fa-cog"></i> Settings</a>
-                    <a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="{{route('profile.edit')}}"><i class="fas fa-user"></i> Profile</a>
+                    <!-- <a href="customer-settings.html"><i class="fas fa-cog"></i> Settings</a> -->
+                    <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
                 </div>
             </div>
         </div>
@@ -31,43 +40,33 @@
         <aside class="dashboard-sidebar">
             <ul class="sidebar-menu">
                 <li class="active">
-                    <a href="buyer-dashboard.html">
+                    <a href="/">
                         <i class="fas fa-home"></i>
                         <span>Home</span>
                     </a>
                 </li>
                
                 <li>
-                    <a href="cart.html">
+                    <a href="{{ route('cart.index') }}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>My Cart</span>
                         <span class="cart-count">0</span>
                     </a>
                 </li>
                 <li>
-                    <a href="customer-order.html">
+                    <a href="{{ route('orders') }}">
                         <i class="fas fa-box"></i>
                         <span>My Orders</span>
                     </a>
                 </li>
-                <li>
-                    <a href="customer-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
+                
             </ul>
         </aside>
 
         <!-- Main Content -->
         <main class="dashboard-main">
             <!-- Search Bar -->
-            <div class="search-bar">
-                <input type="text" placeholder="Search for products..." class="search-input">
-                <button class="btn btn-primary">
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
+            
 
             <!-- Hero Banner Section -->
             <section class="dashboard-section hero-banner">
@@ -101,10 +100,8 @@
                             </div>
                         </div>
                         <div class="banner-actions">
-                            <button class="btn btn-primary add-to-cart">
-                                <i class="fas fa-shopping-cart"></i> Shop Now
-                            </button>
-                            <button class="btn btn-outline add-to-cart">
+                            
+                            <button class="btn btn-outline add-to-cart" data-product-id="{{ $limitedOffer->id }}">
                                 <i class="fas fa-cart-plus"></i> Add to Cart
                             </button>
                         </div>
@@ -115,7 +112,7 @@
                             <div class="image-badge">
                                 <div class="badge-content">
                                     <span class="badge-label">Best Seller</span>
-                                    <span class="badge-price">₦29,999</span>
+                                    <span class="badge-price">{{$limitedOffer->price }}</span>
                                 </div>
                             </div>
                         </div>
@@ -125,68 +122,34 @@
 
             <!-- Featured Categories Grid -->
             <div class="featured-grid">
+                @foreach($featuredProducts->take(3) as $product)
                 <div class="featured-card">
                     <div class="card-content">
                         <div class="card-image">
-                            <img src="https://images.unsplash.com/photo-1491336477066-31156b5e4f35?w=300&q=80" alt="AVAKEN Collection" />
+                            <img src="{{ $product->image ?? 'https://images.unsplash.com/photo-1491336477066-31156b5e4f35?w=300&q=80' }}" 
+                                 alt="{{ $product->name }}" />
                         </div>
                         <div class="card-details">
-                            <span class="category-tag">New Collection</span>
-                            <h3>AWAKEN Collection</h3>
-                            <p class="description">Discover our latest premium designs</p>
+                            <span class="category-tag">{{ $product->category->name }}</span>
+                            <h3>{{ $product->name }}</h3>
+                            <p class="description">{{ $product->description }}</p>
                             <div class="offer-details">
-                                <div class="discount-badge">30% OFF</div>
-                                <span class="validity">Limited time offer</span>
+                                @if($product->discount > 0)
+                                    <div class="discount-badge">{{ $product->discount }}% OFF</div>
+                                    <span class="validity">Limited time offer</span>
+                                @else
+                                    <div class="discount-badge">Featured</div>
+                                    <span class="validity">Premium product</span>
+                                @endif
                             </div>
-                            <button class="btn btn-outline btn-explore">
-                                <span>Explore Collection</span>
+                            <button class="btn btn-outline btn-explore add-to-cart" data-product-id="{{ $product->id }}">
+                                <span>Add to cart</span>
                                 <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <div class="featured-card">
-                    <div class="card-content">
-                        <div class="card-image">
-                            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80" alt="Iconic Watches" />
-                        </div>
-                        <div class="card-details">
-                            <span class="category-tag">Trending</span>
-                            <h3>Iconic Watches</h3>
-                            <p class="description">Timeless elegance for every occasion</p>
-                            <div class="offer-details">
-                                <div class="discount-badge">Exclusive</div>
-                                <span class="validity">Premium collection</span>
-                            </div>
-                            <button class="btn btn-outline btn-explore">
-                                <span>View Collection</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="featured-card">
-                    <div class="card-content">
-                        <div class="card-image">
-                            <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&q=80" alt="Year End Sale" />
-                        </div>
-                        <div class="card-details">
-                            <span class="category-tag">Special Offer</span>
-                            <h3>Year End Sale</h3>
-                            <p class="description">Massive discounts on top brands</p>
-                            <div class="offer-details">
-                                <div class="discount-badge">Up to 50%</div>
-                                <span class="validity">Ends soon</span>
-                            </div>
-                            <button class="btn btn-outline btn-explore">
-                                <span>Shop Now</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
 
             <!-- Deals of the Day -->
@@ -206,25 +169,27 @@
                 </div>
 
                 <div class="products-grid">
-                    <!-- Product Card 1 -->
+                    @foreach($dealsOfDay->take(3) as $deal)
                     <div class="product-card">
                         <div class="product-header">
-                            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&q=80" 
-                                 alt="Red leather GUCCI bag" 
+                            <img src="{{ $deal->image ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&q=80' }}" 
+                                 alt="{{ $deal->name }}" 
                                  class="product-image">
-                            <div class="product-status">-30%</div>
+                            <div class="product-status">-{{ $deal->discount }}%</div>
                         </div>
                         <div class="product-content">
-                            <h4>Red leather GUCCI bag</h4>
-                            <p class="price">₦50,000 <span class="original-price">₦70,000</span></p>
+                            <h4>{{ $deal->name }}</h4>
+                            <p class="price">₦{{ number_format($deal->price * (1 - $deal->discount/100), 2) }} 
+                                <span class="original-price">₦{{ number_format($deal->price, 2) }}</span>
+                            </p>
                             <div class="product-metrics">
                                 <div class="metric">
                                     <i class="fas fa-star"></i>
-                                    <span>4.8</span>
+                                    <span>{{ number_format($deal->rating, 1) }}</span>
                                 </div>
                                 <div class="metric">
                                     <i class="fas fa-shopping-cart"></i>
-                                    <span>150+ sold</span>
+                                    <span>{{ rand(45, 150) }}+ sold</span>
                                 </div>
                             </div>
                         </div>
@@ -235,151 +200,9 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Product Card 2 -->
-                    <div class="product-card">
-                        <div class="product-header">
-                            <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&q=80" 
-                                 alt="LEARX face cream" 
-                                 class="product-image">
-                            <div class="product-status">-25%</div>
-                        </div>
-                        <div class="product-content">
-                            <h4>LEARX face cream</h4>
-                            <p class="price">₦3,000 <span class="original-price">₦4,000</span></p>
-                            <div class="product-metrics">
-                                <div class="metric">
-                                    <i class="fas fa-star"></i>
-                                    <span>4.6</span>
-                                </div>
-                                <div class="metric">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <span>90+ sold</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-primary add-to-cart">
-                                <i class="fas fa-cart-plus"></i>
-                                <span>Add to Cart</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 3 -->
-                    <div class="product-card">
-                        <div class="product-header">
-                            <img src="https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?w=300&q=80" 
-                                 alt="Fuji Film DSLR camera" 
-                                 class="product-image">
-                            <div class="product-status">-20%</div>
-                        </div>
-                        <div class="product-content">
-                            <h4>Fuji Film DSLR camera</h4>
-                            <p class="price">₦25,000 <span class="original-price">₦30,000</span></p>
-                            <div class="product-metrics">
-                                <div class="metric">
-                                    <i class="fas fa-star"></i>
-                                    <span>4.9</span>
-                                </div>
-                                <div class="metric">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <span>45+ sold</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-primary add-to-cart">
-                                <i class="fas fa-cart-plus"></i>
-                                <span>Add to Cart</span>
-                            </button>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
-            </section>
-            <!-- Seller Contact Section -->
-            <section class="dashboard-section seller-contact-section">
-                <div class="section-header">
-                    <h2>Contact Sellers</h2>
-                    <div class="header-actions">
-                        <button class="btn btn-outline">
-                            <span>View All Sellers</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-            
-                <div class="seller-grid">
-                    <!-- Seller Card 1 -->
-                    <div class="seller-card">
-                        <div class="seller-info">
-                            <img src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=4F46E5&color=fff&size=48" 
-                                 alt="Sarah Johnson" class="seller-avatar">
-                            <div class="seller-details">
-                                <h4 class="seller-name">Sarah Johnson</h4>
-                                <div class="seller-stats">
-                                    <span><i class="fas fa-star"></i> 4.9</span>
-                                    <span><i class="fas fa-box"></i> 150+ products</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="seller-actions">
-                            <button class="btn btn-primary">
-                                <i class="fas fa-comment"></i> Chat Now
-                            </button>
-                            <button class="btn btn-outline">
-                                <i class="fas fa-store"></i> View Store
-                            </button>
-                        </div>
-                    </div>
-            
-                    <!-- Seller Card 2 -->
-                    <div class="seller-card">
-                        <div class="seller-info">
-                            <img src="https://ui-avatars.com/api/?name=David+Chen&background=4F46E5&color=fff&size=48" 
-                                 alt="David Chen" class="seller-avatar">
-                            <div class="seller-details">
-                                <h4 class="seller-name">David Chen</h4>
-                                <div class="seller-stats">
-                                    <span><i class="fas fa-star"></i> 4.8</span>
-                                    <span><i class="fas fa-box"></i> 200+ products</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="seller-actions">
-                            <button class="btn btn-primary">
-                                <i class="fas fa-comment"></i> Chat Now
-                            </button>
-                            <button class="btn btn-outline">
-                                <i class="fas fa-store"></i> View Store
-                            </button>
-                        </div>
-                    </div>
-            
-                    <!-- Seller Card 3 -->
-                    <div class="seller-card">
-                        <div class="seller-info">
-                            <img src="https://ui-avatars.com/api/?name=Emma+Williams&background=4F46E5&color=fff&size=48" 
-                                 alt="Emma Williams" class="seller-avatar">
-                            <div class="seller-details">
-                                <h4 class="seller-name">Emma Williams</h4>
-                                <div class="seller-stats">
-                                    <span><i class="fas fa-star"></i> 4.7</span>
-                                    <span><i class="fas fa-box"></i> 120+ products</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="seller-actions">
-                            <button class="btn btn-primary">
-                                <i class="fas fa-comment"></i> Chat Now
-                            </button>
-                            <button class="btn btn-outline">
-                                <i class="fas fa-store"></i> View Store
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </section>            
 
         </main>
     </div>
@@ -417,6 +240,42 @@
             if (!userMenu.contains(e.target)) {
                 dropdownMenu.classList.remove('show');
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add to cart functionality
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    
+                    fetch(`/cart/add/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            quantity: 1
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update cart count
+                            document.querySelectorAll('.cart-count').forEach(el => {
+                                el.textContent = data.cart_count;
+                            });
+                            
+                            // Show success message
+                            alert('Product added to cart successfully!');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to add product to cart. Please try again.');
+                    });
+                });
+            });
         });
     </script>
 </body>

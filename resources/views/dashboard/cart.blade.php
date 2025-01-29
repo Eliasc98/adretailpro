@@ -6,6 +6,7 @@
     <title>Shopping Cart - AdRetail Pro</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <!-- Navigation -->
@@ -84,7 +85,7 @@
 
                     <div class="cart-items">
                         <!-- Cart Item 1 -->
-                        <div class="cart-item">
+                        <div class="cart-item" data-cart-id="1">
                             <div class="item-image">
                                 <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&q=80" alt="Premium Headphones">
                                 <button class="wishlist-btn" title="Add to Wishlist">
@@ -109,16 +110,16 @@
                                         <span class="current-price">₦119,996</span>
                                         <span class="original-price">₦139,996</span>
                                     </div>
-                                    <div class="quantity-controls">
-                                        <button class="quantity-btn" onclick="updateQuantity(1, 'decrease')">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn decrease">
                                             <i class="fas fa-minus"></i>
                                         </button>
-                                        <input type="number" value="1" min="1" max="10" class="quantity-input">
-                                        <button class="quantity-btn" onclick="updateQuantity(1, 'increase')">
+                                        <input type="number" value="1" min="1" max="10" class="quantity">
+                                        <button class="quantity-btn increase">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
-                                    <button class="remove-item" onclick="removeItem(1)" title="Remove Item">
+                                    <button class="remove-item" title="Remove Item">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -126,7 +127,7 @@
                         </div>
 
                         <!-- Cart Item 2 -->
-                        <div class="cart-item">
+                        <div class="cart-item" data-cart-id="2">
                             <div class="item-image">
                                 <img src="https://images.unsplash.com/photo-1491336477066-31156b5e4f35?w=300&q=80" alt="Smart Watch">
                                 <button class="wishlist-btn" title="Add to Wishlist">
@@ -151,16 +152,16 @@
                                         <span class="current-price">₦79,996</span>
                                         <span class="original-price">₦99,996</span>
                                     </div>
-                                    <div class="quantity-controls">
-                                        <button class="quantity-btn" onclick="updateQuantity(2, 'decrease')">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn decrease">
                                             <i class="fas fa-minus"></i>
                                         </button>
-                                        <input type="number" value="1" min="1" max="10" class="quantity-input">
-                                        <button class="quantity-btn" onclick="updateQuantity(2, 'increase')">
+                                        <input type="number" value="1" min="1" max="10" class="quantity">
+                                        <button class="quantity-btn increase">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
-                                    <button class="remove-item" onclick="removeItem(2)" title="Remove Item">
+                                    <button class="remove-item" title="Remove Item">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -193,7 +194,7 @@
                         </div>
                         <div class="summary-total">
                             <span>Total</span>
-                            <span>₦189,992</span>
+                            <span class="cart-total">₦189,992</span>
                         </div>
                         <button class="checkout-btn">
                             Proceed to Checkout
@@ -224,57 +225,97 @@
     </div>
 
     <script>
-        // Cart functionality
-        function updateQuantity(itemId, action) {
-            const input = event.target.closest('.quantity-controls').querySelector('.quantity-input');
-            let value = parseInt(input.value);
-            
-            if (action === 'increase' && value < 10) {
-                input.value = value + 1;
-            } else if (action === 'decrease' && value > 1) {
-                input.value = value - 1;
-            }
-            updateCartTotal();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update quantity
+            document.querySelectorAll('.quantity-control button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const cartId = this.closest('.cart-item').dataset.cartId;
+                    const isIncrease = this.classList.contains('increase');
+                    const quantityInput = this.closest('.quantity-control').querySelector('.quantity');
+                    let quantity = parseInt(quantityInput.value);
 
-        function removeItem(itemId) {
-            const item = event.target.closest('.cart-item');
-            item.remove();
-            updateCartTotal();
-            updateCartCount();
-        }
+                    if (isIncrease) {
+                        quantity++;
+                    } else if (quantity > 1) {
+                        quantity--;
+                    }
 
-        function clearCart() {
-            const cartItems = document.querySelector('.cart-items');
-            cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
-            updateCartTotal();
-            updateCartCount();
-        }
-
-        function updateCartTotal() {
-            // Add logic to update cart total
-            console.log('Updating cart total...');
-        }
-
-        function updateCartCount() {
-            const cartCount = document.querySelector('.cart-count');
-            const itemCount = document.querySelectorAll('.cart-item').length;
-            cartCount.textContent = itemCount;
-        }
-
-        // Initialize dropdown menu
-        document.querySelector('.profile-img').addEventListener('click', function() {
-            document.querySelector('.dropdown-menu').classList.toggle('show');
-        });
-
-        // Initialize wishlist buttons
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const icon = this.querySelector('i');
-                icon.classList.toggle('far');
-                icon.classList.toggle('fas');
-                icon.classList.toggle('text-danger');
+                    updateCartQuantity(cartId, quantity);
+                });
             });
+
+            // Remove item
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.addEventListener('click', function() {
+                    const cartId = this.closest('.cart-item').dataset.cartId;
+                    removeCartItem(cartId);
+                });
+            });
+
+            function updateCartQuantity(cartId, quantity) {
+                fetch(`/cart/${cartId}/update-quantity`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ quantity })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update quantity display
+                        document.querySelector(`[data-cart-id="${cartId}"] .quantity`).value = quantity;
+                        
+                        // Update total price
+                        document.querySelector('.cart-total').textContent = 
+                            '₦' + new Intl.NumberFormat().format(data.total);
+                        
+                        // Update cart count in header
+                        document.querySelectorAll('.cart-count').forEach(el => {
+                            el.textContent = data.cart_count;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update quantity. Please try again.');
+                });
+            }
+
+            function removeCartItem(cartId) {
+                if (!confirm('Are you sure you want to remove this item from your cart?')) {
+                    return;
+                }
+
+                fetch(`/cart/${cartId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove item from DOM
+                        document.querySelector(`[data-cart-id="${cartId}"]`).remove();
+                        
+                        // Update cart count in header
+                        document.querySelectorAll('.cart-count').forEach(el => {
+                            el.textContent = data.cart_count;
+                        });
+                        
+                        // Refresh page if cart is empty
+                        if (data.cart_count === 0) {
+                            window.location.reload();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to remove item. Please try again.');
+                });
+            }
         });
     </script>
 </body>
