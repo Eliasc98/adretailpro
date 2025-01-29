@@ -40,69 +40,30 @@
                     </button>
                 </div>
 
-                <!-- Login Form -->
-                <form method="POST" action="{{ route('login') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-                <form id="login-form" class="login-form">
+                
+                <form id="login-form" class="login-form" method="POST" action="{{ route('login') }}">
+                    @csrf
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <div class="input-with-icon">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                            <input type="email" id="email" name="email" placeholder="your@email.com" :value="old('email')" required autofocus autocomplete="username">
                         </div>
+                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-with-icon">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
                             <button type="button" class="toggle-password">
                                 <i class="fas fa-eye"></i>
                             </button>
+                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
                     </div>
-
+                    
                     <div class="form-options">
                         <label class="remember-me">
                             <input type="checkbox" name="remember">
@@ -117,24 +78,15 @@
                     </button>
                 </form>
 
-                <div class="login-divider">
-                    <span>OR</span>
-                </div>
-
-                <div class="social-login">
-                    <button class="social-btn google">
-                        <i class="fab fa-google"></i>
-                        <span>Continue with Google</span>
-                    </button>
-                    <button class="social-btn facebook">
-                        <i class="fab fa-facebook-f"></i>
-                        <span>Continue with Facebook</span>
-                    </button>
-                </div>
+                @if (Route::has('password.request'))
+                    <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
+                        {{ __('Forgot your password?') }}
+                    </a>
+                @endif
 
                 <p class="signup-prompt">
                     Don't have an account? 
-                    <a href="signup.html" class="signup-link">Sign up now</a>
+                    <a href="{{route('register')}}" class="signup-link">Sign up now</a>
                 </p>
             </div>
         </div>
