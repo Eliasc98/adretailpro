@@ -28,6 +28,13 @@
                         <i class="fas fa-sign-in-alt"></i>
                         <span>Dashboard</span>
                     </a>
+                    
+                    <a href="{{ route('cart.index') }}">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>My Cart</span>
+                        <span class="cart-count">({{ $cartItems->count() }})</span>
+                    </a>
+                
                 @else
                     <a href="{{ route('login') }}" class="login-btn">
                         <i class="fas fa-sign-in-alt"></i>

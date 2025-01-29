@@ -50,6 +50,13 @@ class CartController extends Controller
         ]);
     }
 
+    public function clear()
+    {
+        Cart::where('user_id', auth()->id())->delete();
+        
+        return redirect()->route('cart.index')->with('success', 'Cart cleared successfully');
+    }
+
     public function getItems()
     {
         $cartItems = Cart::where('user_id', auth()->id())->with('product')->get();

@@ -76,7 +76,7 @@
             <div class="cart-container">
                 <div class="cart-items-section">
                     <div class="cart-header">
-                        <h2>Cart Items (3)</h2>
+                        <h2>Cart Items ({{ $cartItems->count() }})</h2>
                         <button class="btn-text" onclick="clearCart()">
                             <i class="fas fa-trash-alt"></i>
                             Clear Cart
@@ -84,89 +84,62 @@
                     </div>
 
                     <div class="cart-items">
-                        <!-- Cart Item 1 -->
-                        <div class="cart-item" data-cart-id="1">
-                            <div class="item-image">
-                                <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&q=80" alt="Premium Headphones">
-                                <button class="wishlist-btn" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="item-details">
-                                <div class="item-info">
-                                    <h3>Premium Headphones</h3>
-                                    <p class="item-description">Wireless Noise Cancelling Headphones</p>
-                                    <div class="item-meta">
-                                        <span class="stock-status in-stock">
-                                            <i class="fas fa-check-circle"></i> In Stock
-                                        </span>
-                                        <span class="delivery-info">
-                                            <i class="fas fa-truck"></i> Free Delivery
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="item-actions">
-                                    <div class="item-price">
-                                        <span class="current-price">₦119,996</span>
-                                        <span class="original-price">₦139,996</span>
-                                    </div>
-                                    <div class="quantity-control">
-                                        <button class="quantity-btn decrease">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <input type="number" value="1" min="1" max="10" class="quantity">
-                                        <button class="quantity-btn increase">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    <button class="remove-item" title="Remove Item">
-                                        <i class="fas fa-trash"></i>
+                        @forelse($cartItems as $cartItem)
+                            <div class="cart-item" data-cart-id="{{ $cartItem->id }}">
+                                <div class="item-image">
+                                    <img src="{{ $cartItem->product->image_url }}" alt="{{ $cartItem->product->name }}">
+                                    <button class="wishlist-btn" title="Add to Wishlist">
+                                        <i class="far fa-heart"></i>
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Cart Item 2 -->
-                        <div class="cart-item" data-cart-id="2">
-                            <div class="item-image">
-                                <img src="https://images.unsplash.com/photo-1491336477066-31156b5e4f35?w=300&q=80" alt="Smart Watch">
-                                <button class="wishlist-btn" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="item-details">
-                                <div class="item-info">
-                                    <h3>Smart Watch Pro</h3>
-                                    <p class="item-description">Latest Generation Smartwatch with Health Monitoring</p>
-                                    <div class="item-meta">
-                                        <span class="stock-status in-stock">
-                                            <i class="fas fa-check-circle"></i> In Stock
-                                        </span>
-                                        <span class="delivery-info">
-                                            <i class="fas fa-truck"></i> Free Delivery
-                                        </span>
+                                <div class="item-details">
+                                    <div class="item-info">
+                                        <h3>{{ $cartItem->product->name }}</h3>
+                                        <p class="item-description">{{ $cartItem->product->description }}</p>
+                                        <div class="item-meta">
+                                            <span class="stock-status {{ $cartItem->product->stock > 0 ? 'in-stock' : 'out-of-stock' }}">
+                                                <i class="fas {{ $cartItem->product->stock > 0 ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                                                {{ $cartItem->product->stock > 0 ? 'In Stock' : 'Out of Stock' }}
+                                            </span>
+                                            <span class="delivery-info">
+                                                <i class="fas fa-truck"></i> Free Delivery
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="item-actions">
-                                    <div class="item-price">
-                                        <span class="current-price">₦79,996</span>
-                                        <span class="original-price">₦99,996</span>
-                                    </div>
-                                    <div class="quantity-control">
-                                        <button class="quantity-btn decrease">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <input type="number" value="1" min="1" max="10" class="quantity">
-                                        <button class="quantity-btn increase">
-                                            <i class="fas fa-plus"></i>
+                                    <div class="item-actions">
+                                        <div class="item-price">
+                                            @if($cartItem->product->discount > 0)
+                                                <span class="current-price">₦{{ number_format($cartItem->product->price * (1 - $cartItem->product->discount / 100), 2) }}</span>
+                                                <span class="original-price">₦{{ number_format($cartItem->product->price, 2) }}</span>
+                                            @else
+                                                <span class="current-price">₦{{ number_format($cartItem->product->price, 2) }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="quantity-control">
+                                            <button class="quantity-btn decrease">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" value="{{ $cartItem->quantity }}" min="1" max="{{ $cartItem->product->stock }}" class="quantity">
+                                            <button class="quantity-btn increase">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <button class="remove-item" title="Remove Item">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
-                                    <button class="remove-item" title="Remove Item">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        @empty
+                            <div class="cart-item">
+                                <div class="item-details">
+                                    <div class="item-info">
+                                        <h3>Your cart is empty</h3>
+                                        <p>Add items to your cart to continue shopping.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -176,8 +149,12 @@
                         <h3>Order Summary</h3>
                         <div class="summary-items">
                             <div class="summary-item">
-                                <span>Subtotal (3 items)</span>
-                                <span>₦199,992</span>
+                                <span>Subtotal ({{ $cartItems->count() }} items)</span>
+                                <span>₦{{ number_format($cartItems->sum(function($item) {
+                                    return $item->quantity * ($item->product->discount > 0 
+                                        ? $item->product->price * (1 - $item->product->discount / 100)
+                                        : $item->product->price);
+                                }), 2) }}</span>
                             </div>
                             <div class="summary-item">
                                 <span>Shipping</span>
@@ -185,18 +162,42 @@
                             </div>
                             <div class="summary-item">
                                 <span>Tax</span>
-                                <span>₦10,000</span>
+                                <span>₦{{ number_format($cartItems->sum(function($item) {
+                                    return $item->quantity * ($item->product->discount > 0 
+                                        ? $item->product->price * (1 - $item->product->discount / 100)
+                                        : $item->product->price);
+                                }) * 0.05, 2) }}</span>
                             </div>
-                            <div class="summary-item discount">
-                                <span>Discount Applied</span>
-                                <span class="text-success">-₦20,000</span>
-                            </div>
+                            @php
+                                $totalDiscount = $cartItems->sum(function($item) {
+                                    if ($item->product->discount > 0) {
+                                        return $item->quantity * ($item->product->price * ($item->product->discount / 100));
+                                    }
+                                    return 0;
+                                });
+                            @endphp
+                            @if($totalDiscount > 0)
+                                <div class="summary-item discount">
+                                    <span>Discount Applied</span>
+                                    <span class="text-success">-₦{{ number_format($totalDiscount, 2) }}</span>
+                                </div>
+                            @endif
                         </div>
                         <div class="summary-total">
                             <span>Total</span>
-                            <span class="cart-total">₦189,992</span>
+                            <span class="cart-total">₦{{ number_format($cartItems->sum(function($item) {
+                                $itemTotal = $item->quantity * ($item->product->discount > 0 
+                                    ? $item->product->price * (1 - $item->product->discount / 100)
+                                    : $item->product->price);
+                                return $itemTotal + ($itemTotal * 0.05); // Adding 5% tax
+                            }), 2) }}</span>
                         </div>
-                        <button class="checkout-btn">
+                        <button class="checkout-btn" onclick="payWithPaystack({{ number_format($cartItems->sum(function($item) {
+                                $itemTotal = $item->quantity * ($item->product->discount > 0 
+                                    ? $item->product->price * (1 - $item->product->discount / 100)
+                                    : $item->product->price);
+                                return $itemTotal + ($itemTotal * 0.05);
+                            }), 2) }}, '{{ Auth::user()->email }}')">
                             Proceed to Checkout
                             <i class="fas fa-arrow-right"></i>
                         </button>
@@ -212,18 +213,67 @@
                         </div>
                     </div>
 
-                    <div class="promo-card">
-                        <h4>Have a Promo Code?</h4>
-                        <div class="promo-input">
-                            <input type="text" placeholder="Enter promo code">
-                            <button class="btn-primary">Apply</button>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </main>
     </div>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script>
+        function payWithPaystack(amount, email) {
+            console.log('Initiating payment...');
 
+            let handler = PaystackPop.setup({
+                key: 'pk_test_f24eee9b0d2330b8bf2323d218e1177d6fb5ea9f',
+                email: email,
+                amount: amount * 100,
+                ref: '' + Math.floor((Math.random() * 1000000000) + 1),
+                callback: function(response) {
+                    console.log('Payment completed. Verifying payment...');
+
+                    var params = new URLSearchParams({
+                        'amount': amount,
+                        'email': email,
+                        'res': response.reference,
+                    });
+
+                    fetch("{{URL('verify-payment')}}?" + params.toString(), {
+                        method: "GET",
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        console.log('Verification result:', result);
+                        
+                        if (result.status === 'success') {
+                            // Show success message
+                            alert('Payment successful! Your order has been placed.');
+                            // Redirect to orders page
+                            window.location.href = "{{ route('orders') }}";
+                        } else {
+                            alert('Payment verification failed: ' + result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Verification error:', error);
+                        alert('An error occurred while verifying your payment. Please contact support.');
+                    });
+                },
+                onClose: function() {
+                    console.log('Payment window closed');
+                }
+            });
+
+            handler.openIframe();
+        }
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Update quantity
@@ -248,7 +298,9 @@
             document.querySelectorAll('.remove-item').forEach(button => {
                 button.addEventListener('click', function() {
                     const cartId = this.closest('.cart-item').dataset.cartId;
-                    removeCartItem(cartId);
+                    if (confirm('Are you sure you want to remove this item from your cart?')) {
+                        removeCartItem(cartId);
+                    }
                 });
             });
 
@@ -264,17 +316,9 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update quantity display
-                        document.querySelector(`[data-cart-id="${cartId}"] .quantity`).value = quantity;
-                        
-                        // Update total price
-                        document.querySelector('.cart-total').textContent = 
-                            '₦' + new Intl.NumberFormat().format(data.total);
-                        
-                        // Update cart count in header
-                        document.querySelectorAll('.cart-count').forEach(el => {
-                            el.textContent = data.cart_count;
-                        });
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Error updating quantity');
                     }
                 })
                 .catch(error => {
@@ -284,10 +328,6 @@
             }
 
             function removeCartItem(cartId) {
-                if (!confirm('Are you sure you want to remove this item from your cart?')) {
-                    return;
-                }
-
                 fetch(`/cart/${cartId}`, {
                     method: 'DELETE',
                     headers: {
@@ -297,24 +337,37 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Remove item from DOM
-                        document.querySelector(`[data-cart-id="${cartId}"]`).remove();
-                        
-                        // Update cart count in header
-                        document.querySelectorAll('.cart-count').forEach(el => {
-                            el.textContent = data.cart_count;
-                        });
-                        
-                        // Refresh page if cart is empty
-                        if (data.cart_count === 0) {
-                            window.location.reload();
-                        }
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Error removing item');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Failed to remove item. Please try again.');
                 });
+            }
+
+            window.clearCart = function() {
+                if (confirm('Are you sure you want to clear your cart?')) {
+                    fetch('/cart/clear', {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            alert('Error clearing cart');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to clear cart. Please try again.');
+                    });
+                }
             }
         });
     </script>

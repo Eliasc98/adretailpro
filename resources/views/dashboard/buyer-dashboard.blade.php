@@ -50,7 +50,7 @@
                     <a href="{{ route('cart.index') }}">
                         <i class="fas fa-shopping-cart"></i>
                         <span>My Cart</span>
-                        <span class="cart-count">0</span>
+                        <span class="cart-count">({{ $cartItems->count() }})</span>
                     </a>
                 </li>
                 <li>
@@ -194,7 +194,7 @@
                             </div>
                         </div>
                         <div class="product-actions">
-                            <button class="btn btn-primary add-to-cart">
+                            <button class="btn btn-primary add-to-cart" data-product-id="{{ $product->id }}">
                                 <i class="fas fa-cart-plus"></i>
                                 <span>Add to Cart</span>
                             </button>

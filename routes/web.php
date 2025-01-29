@@ -12,7 +12,8 @@ use App\Models\Cart;
 use Carbon\Carbon;
 
 Route::get('/', function () {
-    return view('index');
+    $cartItems = Cart::where('user_id', auth()->id())->with('product')->get();
+    return view('index', compact('cartItems'));
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -52,6 +53,8 @@ Route::middleware(['auth'])->group(function () {
                 ->with('category')
                 ->take(3)
                 ->get();
+
+            $cartItems = Cart::where('user_id', auth()->id())->with('product')->get();
             
             $dealsOfDay = Product::where('status', 'active')
                 ->where('discount', '>', 0)
@@ -68,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
                 ->orderBy('discount', 'desc')
                 ->first();
 
-            return view('dashboard.buyer-dashboard', compact('featuredProducts', 'dealsOfDay', 'limitedOffer'));
+            return view('dashboard.buyer-dashboard', compact('featuredProducts', 'dealsOfDay', 'limitedOffer', 'cartItems'));
         }
     })->name('dashboard');
 
@@ -85,10 +88,12 @@ Route::middleware(['auth'])->group(function () {
     })->name('cart.index');
     Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
     Route::delete('/cart/{cart}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::get('/cart/items', [CartController::class, 'getItems'])->name('cart.items');
     Route::post('/cart/{cart}/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
 
     // Payment
+    Route::get('/checkout-payment', [PaymentController::class, 'verifyPayment'])->name('verify-payment');
     Route::get('/checkout', [PaymentController::class, 'checkout'])->name('checkout');
     Route::post('/payment/initialize', [PaymentController::class, 'initializePayment'])->name('payment.initialize');
     Route::get('/payment/callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
