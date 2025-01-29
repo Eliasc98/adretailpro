@@ -74,7 +74,7 @@
                             <label for="business-name">Business Name</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-building"></i>
-                                <input type="text" id="business-name" name="business-name" placeholder="Enter your business name" required>
+                                <input type="text" id="business-name" name="business_name" placeholder="Enter your business name" required>
                             </div>
                         </div>
 
@@ -82,7 +82,7 @@
                             <label for="business-type">Business Type</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-briefcase"></i>
-                                <select id="business-type" name="business-type" required>
+                                <select id="business-type" name="business_type" required>
                                     <option value="">Select Business Type</option>
                                     <option value="retail">Retail Store</option>
                                     <option value="wholesale">Wholesale Business</option>
@@ -97,36 +97,13 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="product-categories">Product Categories</label>
-                            <div class="input-with-icon">
-                
-                                <select id="product-categories" name="product-categories" required>
-                                    <option value="fashion">Fashion & Apparel</option>
-                                    <option value="electronics">Electronics & Gadgets</option>
-                                    <option value="home">Home & Garden</option>
-                                    <option value="beauty">Beauty & Personal Care</option>
-                                    <option value="health">Health & Wellness</option>
-                                    <option value="food">Food & Beverages</option>
-                                    <option value="sports">Sports & Outdoor</option>
-                                    <option value="books">Books & Stationery</option>
-                                    <option value="art">Art & Collectibles</option>
-                                    <option value="jewelry">Jewelry & Accessories</option>
-                                    <option value="automotive">Automotive & Industrial</option>
-                                    <option value="kids">Kids & Baby Products</option>
-                                    <option value="pets">Pet Supplies</option>
-                                    <option value="digital_goods">Digital Goods</option>
-                                    <option value="other">Other Categories</option>
-                                </select>
-                                <!-- <small class="field-hint">Hold Ctrl/Cmd to select multiple categories that best describe your products</small> -->
-                            </div>
-                        </div>
+                       
 
                         <div class="form-group">
                             <label for="business-description">Business Description</label>
                             <div class="input-with-icon">
                                
-                                <textarea id="business-description" name="business-description" 
+                                <textarea id="business-description" name="business_description" 
                                     placeholder="Tell us about your business, products, and what makes you unique..." required></textarea>
                                 <small class="field-hint">Provide a clear description of your business and products to help customers understand your offerings</small>
                             </div>
@@ -136,7 +113,7 @@
                             <label for="business-address">Business Address</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-location-dot"></i>
-                                <textarea id="business-address" name="business-address" 
+                                <textarea id="business-address" name="business_address" 
                                     placeholder="Enter your complete business address..." required></textarea>
                             </div>
                         </div>
