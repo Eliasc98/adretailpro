@@ -7,6 +7,369 @@
     <link rel="stylesheet" href="{{asset('styles.css')}}">
     <link rel="icon" href="{{asset('favicon.ico')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .products {
+            padding: 4rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .products h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: #007bff;
+            color: white;
+        }
+
+        .product-badge.out-of-stock {
+            background: #dc3545;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-info h3 {
+            font-size: 1.2rem;
+            color: #333;
+            margin: 0 0 0.5rem 0;
+            height: 2.8em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-category {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            height: 3.6em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .add-to-cart-form {
+            margin-top: 1rem;
+        }
+
+        .add-to-cart-btn, 
+        .login-to-buy-btn,
+        .out-of-stock-btn {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .add-to-cart-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #0056b3;
+        }
+
+        .login-to-buy-btn {
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+        }
+
+        .login-to-buy-btn:hover {
+            background: #5a6268;
+        }
+
+        .out-of-stock-btn {
+            background: #dc3545;
+            color: white;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .no-products {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-products i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .no-products p {
+            color: #6c757d;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .products {
+                padding: 2rem 1rem;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+
+            .product-info {
+                padding: 1rem;
+            }
+        }
+
+        /* Blogs and Advertisements Section Styles */
+        .blogs, .advertisements {
+            padding: 4rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .blogs h2, .advertisements h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .blogs-grid, .ads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .blog-card, .ad-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .blog-card:hover, .ad-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .blog-image, .ad-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .blog-content, .ad-content {
+            padding: 1.5rem;
+        }
+
+        .blog-title, .ad-title {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .blog-excerpt, .ad-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .blog-meta, .ad-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .blog-link, .ad-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .blog-link:hover, .ad-link:hover {
+            color: #0056b3;
+        }
+
+        @media (max-width: 768px) {
+            .blogs-grid, .ads-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Contact Form Styles */
+        .contact {
+            padding: 4rem 2rem;
+            background: #fff;
+        }
+
+        .contact h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .contact {
+                padding: 2rem 1rem;
+            }
+
+            .contact-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -109,174 +472,183 @@
     </section>
 
     <!-- Products Section -->
-<section id="products" class="products">
-        <h2>Featured Products</h2>
+    <section id="products" class="products">
+        <h2>Our Products</h2>
         <div class="products-grid">
-            <div class="product-card">
-                <div class="product-badge">-25%</div>
-                <img src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/82/7645002/1.jpg" alt="iPhone 13">
-                <div class="product-info">
-                    <h3>Apple iPhone 13 - 128GB</h3>
-                    <div class="product-price">
-                        <span class="current-price">₦599,999</span>
-                        <span class="original-price">₦799,999</span>
+            @forelse ($products as $product)
+                <div class="product-card">
+                    @if ($product->stock < 5 && $product->stock > 0)
+                        <div class="product-badge">Low Stock</div>
+                    @elseif ($product->stock == 0)
+                        <div class="product-badge out-of-stock">Out of Stock</div>
+                    @endif
+                    
+                    <img src="{{ $product->image }}" alt="{{ $product->name }}" class="product-image">
+                    <div class="product-info">
+                        <h3>{{ $product->name }}</h3>
+                        <p class="product-category">
+                            <i class="fas fa-tag"></i> 
+                            {{ $product->category->name ?? 'Uncategorized' }}
+                        </p>
+                        <p class="product-description">{{ Str::limit($product->description, 100) }}</p>
+                        <div class="product-price">₦{{ number_format($product->price, 2) }}</div>
+                        
+                        @auth
+                            @if ($product->stock > 0)
+                                <form action="{{ route('cart.add', ['product' => $product->id]) }}" method="POST" class="add-to-cart-form">
+                                    @csrf
+                                    <button type="submit" class="add-to-cart-btn">
+                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                    </button>
+                                </form>
+                            @else
+                                <button class="out-of-stock-btn" disabled>
+                                    <i class="fas fa-ban"></i> Out of Stock
+                                </button>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}" class="login-to-buy-btn">
+                                <i class="fas fa-sign-in-alt"></i> Login to Purchase
+                            </a>
+                        @endauth
                     </div>
-                    <div class="product-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                        <span>(342)</span>
-                    </div>
-                    <button class="add-to-cart">Add to Cart</button>
                 </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-badge">New</div>
-                <img src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/06/2158722/1.jpg" alt="Samsung TV">
-                <div class="product-info">
-                    <h3>Samsung 43" Smart TV</h3>
-                    <div class="product-price">
-                        <span class="current-price">₦189,990</span>
-                        <span class="original-price">₦250,000</span>
-                    </div>
-                    <div class="product-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <span>(128)</span>
-                    </div>
-                    <button class="add-to-cart">Add to Cart</button>
+            @empty
+                <div class="no-products">
+                    <i class="fas fa-box-open"></i>
+                    <p>No products available at the moment.</p>
                 </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-badge">-30%</div>
-                <img src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/94/2741412/1.jpg" alt="Nike Sneakers">
-                <div class="product-info">
-                    <h3>Nike Air Max Running Shoes</h3>
-                    <div class="product-price">
-                        <span class="current-price">₦28,500</span>
-                        <span class="original-price">₦40,999</span>
-                    </div>
-                    <div class="product-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="far fa-star"></i>
-                        <span>(89)</span>
-                    </div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <img src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/01/241776/1.jpg" alt="PS5">
-                <div class="product-info">
-                    <h3>Sony PlayStation 5 Console</h3>
-                    <div class="product-price">
-                        <span class="current-price">₦489,999</span>
-                        <span class="original-price">₦550,000</span>
-                    </div>
-                    <div class="product-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <span>(456)</span>
-                    </div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-badge">Hot</div>
-                <img src="https://ng.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/26/8913812/1.jpg" alt="Laptop">
-                <div class="product-info">
-                    <h3>HP Pavilion Gaming Laptop</h3>
-                    <div class="product-price">
-                        <span class="current-price">₦459,999</span>
-                        <span class="original-price">₦599,999</span>
-                    </div>
-                    <div class="product-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                        <span>(234)</span>
-                    </div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
-            </div>
+            @endforelse
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="contact-container">
-            <div class="contact-info">
-                <h2>Get In Touch</h2>
-                <p class="contact-description">Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
-                <div class="contact-details">
-                    <div class="contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <div>
-                            <h3>Email Us</h3>
-                            <p>support@adretailpro.com</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-phone"></i>
-                        <div>
-                            <h3>Call Us</h3>
-                            <p>+234 9021493100</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-location-dot"></i>
-                        <div>
-                            <h3>Location</h3>
-                            <p>123 Business Ave, Suite 100<br>San Francisco, CA 94107</p>
+    <!-- Blogs Section -->
+    @php
+        $blogs = \App\Http\Controllers\BlogController::getLandingPageBlogs();
+    @endphp
+    @if($blogs->count() > 0)
+    <section class="blogs">
+        <h2>Latest Blogs</h2>
+        <div class="blogs-grid">
+            @foreach($blogs as $blog)
+                <div class="blog-card">
+                    <img src="{{ $blog->featured_image ? asset('storage/'.$blog->featured_image) : asset('default-blog-image.jpg') }}" 
+                         alt="{{ $blog->title }}" 
+                         class="blog-image">
+                    <div class="blog-content">
+                        <h3 class="blog-title">{{ $blog->title }}</h3>
+                        <p class="blog-excerpt">{{ $blog->excerpt }}</p>
+                        <div class="blog-meta">
+                            <span>{{ $blog->formatted_published_date }}</span>
+                            <a href="{{ route('blog.show', $blog->slug) }}" class="blog-link">Read More</a>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="contact-form-container">
-                <form id="contact-form" class="contact-form">
-                    <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" placeholder="John Doe" required>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    <!-- Advertisements Section -->
+    @php
+        $advertisements = \App\Http\Controllers\BlogController::getLandingPageAdvertisements();
+    @endphp
+    @if($advertisements->count() > 0)
+    <section class="advertisements">
+        <h2>Featured Advertisements</h2>
+        <div class="ads-grid">
+            @foreach($advertisements as $ad)
+                <div class="ad-card">
+                    <img src="{{ $ad->image_url }}" 
+                         alt="{{ $ad->title }}" 
+                         class="ad-image">
+                    <div class="ad-content">
+                        <h3 class="ad-title">{{ $ad->title }}</h3>
+                        <p class="ad-description">{{ $ad->description }}</p>
+                        <div class="ad-meta">
+                            @if($ad->link)
+                                <a href="{{ $ad->link }}" target="_blank" class="ad-link">Learn More</a>
+                            @endif
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="john@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="user-type">I am a</label>
-                        <select id="user-type" name="user-type" required>
-                            <option value="">Select User Type</option>
-                            <option value="seller">Seller</option>
-                            <option value="buyer">Buyer</option>
-                            <option value="both">Both</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Message</label>
-                        <textarea id="message" name="message" placeholder="How can we help you?" required></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn">
-                        <span>Send Message</span>
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </form>
-            </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <h2>Get In Touch</h2>
+        <div class="contact-form">
+            @if(session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            <form action="{{ route('contact.submit') }}" method="POST">
+                @csrf
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" 
+                           class="form-control @error('full_name') is-invalid @enderror" 
+                           id="full_name" 
+                           name="full_name" 
+                           value="{{ old('full_name') }}" 
+                           required>
+                    @error('full_name')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" 
+                           class="form-control @error('email') is-invalid @enderror" 
+                           id="email" 
+                           name="email" 
+                           value="{{ old('email') }}" 
+                           required>
+                    @error('email')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" 
+                           class="form-control @error('subject') is-invalid @enderror" 
+                           id="subject" 
+                           name="subject" 
+                           value="{{ old('subject') }}" 
+                           required>
+                    @error('subject')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea class="form-control @error('message') is-invalid @enderror" 
+                              id="message" 
+                              name="message" 
+                              required>{{ old('message') }}</textarea>
+                    @error('message')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </form>
         </div>
     </section>
 

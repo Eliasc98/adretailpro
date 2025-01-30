@@ -15,12 +15,17 @@
             <div class="logo">AdRetail Pro</div>
      
             <div class="user-menu">
-                <span class="user-name">Joseph Ezeokeke</span>
-                <img src="https://ui-avatars.com/api/?name=Joseph+Ezeokeke&background=4F46E5&color=fff&size=40&rounded=true&bold=true" alt="Joseph Ezeokeke" class="profile-img">
+                <span class="user-name">{{ Auth::user()->name }}</span>
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=4F46E5&color=fff&size=40&rounded=true&bold=true" alt="{{ Auth::user()->name }}" class="profile-img">
                 <div class="dropdown-menu">
-                    <a href="settings.html?tab=general#profile"><i class="fas fa-user"></i> Profile</a>
-                    <a href="settings.html?tab=general"><i class="fas fa-cog"></i> Settings</a>
-                    <a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="{{ route('profile.edit') }}"><i class="fas fa-user"></i> Profile</a>
+                    <a href="{{ route('profile.edit') }}"><i class="fas fa-cog"></i> Settings</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <a href="#" onclick="event.preventDefault(); this.closest('form').submit();">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </form>
                 </div>
             </div>
         </div>
@@ -41,9 +46,27 @@
                 </li>
                 
                 <li>
-                    <a href="manage-ad.html">
+                    <a href="{{ route('dashboard.advertisements') }}">
                         <i class="fas fa-ad"></i>
                         <span>Manage Ads</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('dashboard.blogs') }}">
+                        <i class="fas fa-blog"></i>
+                        <span>Manage Blogs</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('dashboard.advertisements.create') }}">
+                        <i class="fas fa-plus"></i>
+                        <span>Create Ad</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('dashboard.blogs.create') }}">
+                        <i class="fas fa-plus"></i>
+                        <span>Create Blog</span>
                     </a>
                 </li>
                 <li>
@@ -143,117 +166,67 @@
                         <button class="btn btn-outline">
                             <i class="fas fa-filter"></i> Filter
                         </button>
-                        <button class="btn btn-primary">
+                        <a href="{{ route('products.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Add Product
-                        </button>
+                        </a>
                     </div>
                 </div>
                 
                 <div class="products-grid">
-                    <div class="product-card">
-                        <div class="product-header">
-                            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80" alt="Premium Watch" class="product-image">
-                            <div class="product-status trending">Trending</div>
-                        </div>
-                        <div class="product-content">
-                            <h4>Premium Watch</h4>
-                            <p class="price">₦29,000</p>
-                            <div class="product-metrics">
-                                <div class="metric">
+                    @forelse($topProducts as $product)
+                        <div class="product-card">
+                            <div class="product-header">
+                                <img src="{{ $product->image_url ?? 'https://via.placeholder.com/400x300' }}" alt="{{ $product->name ?? 'Product' }}" class="product-image">
+                                @if(isset($product->stock) && $product->stock <= 10)
+                                    <div class="product-status low-stock">Low Stock</div>
+                                @elseif(isset($product->sales) && $product->sales > 100)
+                                    <div class="product-status bestseller">Bestseller</div>
+                                @endif
+                            </div>
+                            <div class="product-content">
+                                <h4>{{ $product->name ?? 'Unnamed Product' }}</h4>
+                                <p class="price">₦{{ number_format($product->price ?? 0, 2) }}</p>
+                                <div class="product-metrics">
+                                    <div class="metric">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>{{ $product->sales ?? 0 }} sales</span>
+                                    </div>
+                                    <div class="metric">
+                                        <i class="fas fa-star"></i>
+                                        <span>{{ number_format($product->rating ?? 0, 1) }} rating</span>
+                                    </div>
+                                </div>
+                                <div class="product-progress">
+                                    <div class="progress-label">
+                                        <span>Stock Level</span>
+                                        <span>{{ $product->stock_percentage ?? 0 }}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: {{ $product->stock_percentage ?? 0 }}%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product-actions">
+                                <a href="{{ route('products.edit', $product->id ?? '#') }}" class="btn-icon" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ route('products.show', $product->id ?? '#') }}" class="btn-icon" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ route('products.analytics', $product->id ?? '#') }}" class="btn-icon" title="Analytics">
                                     <i class="fas fa-chart-line"></i>
-                                    <span>150 sales</span>
-                                </div>
-                                <div class="metric">
-                                    <i class="fas fa-star"></i>
-                                    <span>4.8 rating</span>
-                                </div>
-                            </div>
-                            <div class="product-progress">
-                                <div class="progress-label">
-                                    <span>Stock Level</span>
-                                    <span>75%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 75%;"></div>
-                                </div>
+                                </a>
                             </div>
                         </div>
-                        <div class="product-actions">
-                            <button class="btn-icon" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
-                            <button class="btn-icon" title="Analytics"><i class="fas fa-chart-line"></i></button>
+                    @empty
+                        <div class="no-products">
+                            <i class="fas fa-box-open"></i>
+                            <p>No products available. Add your first product!</p>
+                            <a href="{{ route('products.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Product
+                            </a>
                         </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-header">
-                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" alt="Wireless Headphones" class="product-image">
-                            <div class="product-status bestseller">Bestseller</div>
-                        </div>
-                        <div class="product-content">
-                            <h4>Wireless Headphones</h4>
-                            <p class="price">₦19,000</p>
-                            <div class="product-metrics">
-                                <div class="metric">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span>120 sales</span>
-                                </div>
-                                <div class="metric">
-                                    <i class="fas fa-star"></i>
-                                    <span>4.7 rating</span>
-                                </div>
-                            </div>
-                            <div class="product-progress">
-                                <div class="progress-label">
-                                    <span>Stock Level</span>
-                                    <span>45%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 45%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn-icon" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
-                            <button class="btn-icon" title="Analytics"><i class="fas fa-chart-line"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-header">
-                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" alt="Running Shoes" class="product-image">
-                            <div class="product-status new">New</div>
-                        </div>
-                        <div class="product-content">
-                            <h4>Running Shoes</h4>
-                            <p class="price">₦15,000</p>
-                            <div class="product-metrics">
-                                <div class="metric">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span>95 sales</span>
-                                </div>
-                                <div class="metric">
-                                    <i class="fas fa-star"></i>
-                                    <span>4.6 rating</span>
-                                </div>
-                            </div>
-                            <div class="product-progress">
-                                <div class="progress-label">
-                                    <span>Stock Level</span>
-                                    <span>90%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 90%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn-icon" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
-                            <button class="btn-icon" title="Analytics"><i class="fas fa-chart-line"></i></button>
-                        </div>
-                    </div>
+                    @endforelse
                 </div>
 
                 <!-- Recent Sales Section -->

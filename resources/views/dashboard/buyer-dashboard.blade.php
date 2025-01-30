@@ -100,10 +100,13 @@
                             </div>
                         </div>
                         <div class="banner-actions">
-                            
-                            <button class="btn btn-outline add-to-cart" data-product-id="{{ $limitedOffer->id }}">
-                                <i class="fas fa-cart-plus"></i> Add to Cart
-                            </button>
+                            @if($limitedOffer)
+                                <button class="btn btn-outline add-to-cart" data-product-id="{{ $limitedOffer->id }}">
+                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                </button>
+                            @else
+                                <p>No limited offer available</p>
+                            @endif
                         </div>
                     </div>
                     <div class="banner-image">
@@ -112,7 +115,11 @@
                             <div class="image-badge">
                                 <div class="badge-content">
                                     <span class="badge-label">Best Seller</span>
-                                    <span class="badge-price">{{$limitedOffer->price }}</span>
+                                    @if($limitedOffer)
+                                        <span class="badge-price">{{$limitedOffer->price }}</span>
+                                    @else
+                                        <span class="badge-price">N/A</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
