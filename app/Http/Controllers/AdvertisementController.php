@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Advertisement;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class AdvertisementController extends Controller
 {
@@ -16,8 +17,9 @@ class AdvertisementController extends Controller
      */
     public function index()
     {
-        $advertisements = Advertisement::forSeller(Auth::id())->latest()->paginate(10);
-        return view('dashboard.manage-ad', compact('advertisements'));
+        // Paginate advertisements for the dashboard view
+        $advertisements = Advertisement::latest()->paginate(12);
+        return view('dashboard.advertisements', compact('advertisements'));
     }
 
     /**
@@ -40,36 +42,25 @@ class AdvertisementController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|max:2048',
             'description' => 'nullable|string',
             'link' => 'nullable|url',
             'position' => 'required|in:homepage,sidebar,footer',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'boolean',
-            'category' => 'nullable|string',
-            'priority' => 'nullable|integer'
         ]);
 
         // Handle image upload
-        $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('advertisements', 'public');
+            $validated['image_path'] = $imagePath;
         }
 
-        $advertisement = Advertisement::create([
-            'title' => $validated['title'],
-            'image_path' => $imagePath,
-            'description' => $validated['description'] ?? null,
-            'link' => $validated['link'] ?? null,
-            'position' => $validated['position'],
-            'start_date' => $validated['start_date'] ?? null,
-            'end_date' => $validated['end_date'] ?? null,
-            'is_active' => $validated['is_active'] ?? true,
-            'user_id' => Auth::id(),
-            'category' => $validated['category'] ?? null,
-            'priority' => $validated['priority'] ?? 0
-        ]);
+        // Add user_id if needed
+        $validated['user_id'] = Auth::id();
+
+        $advertisement = Advertisement::create($validated);
 
         return redirect()->route('dashboard.advertisements')
             ->with('success', 'Advertisement created successfully.');
@@ -84,9 +75,11 @@ class AdvertisementController extends Controller
     public function edit(Advertisement $advertisement)
     {
         // Ensure the user can only edit their own advertisements
-        $this->authorize('update', $advertisement);
-
-        return view('dashboard.edit-ad', compact('advertisement'));
+        if (Gate::denies('update', $advertisement)) {
+            abort(403, 'You are not authorized to edit this advertisement.');
+        }
+        
+        return view('dashboard.create-ad', compact('advertisement'));
     }
 
     /**
@@ -98,19 +91,20 @@ class AdvertisementController extends Controller
      */
     public function update(Request $request, Advertisement $advertisement)
     {
-        $this->authorize('update', $advertisement);
+        // Ensure the user can only update their own advertisements
+        if (Gate::denies('update', $advertisement)) {
+            abort(403, 'You are not authorized to update this advertisement.');
+        }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|max:2048',
             'description' => 'nullable|string',
             'link' => 'nullable|url',
             'position' => 'required|in:homepage,sidebar,footer',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'boolean',
-            'category' => 'nullable|string',
-            'priority' => 'nullable|integer'
         ]);
 
         // Handle image upload
@@ -119,21 +113,12 @@ class AdvertisementController extends Controller
             if ($advertisement->image_path) {
                 Storage::disk('public')->delete($advertisement->image_path);
             }
+
             $imagePath = $request->file('image')->store('advertisements', 'public');
-            $advertisement->image_path = $imagePath;
+            $validated['image_path'] = $imagePath;
         }
 
-        $advertisement->update([
-            'title' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'link' => $validated['link'] ?? null,
-            'position' => $validated['position'],
-            'start_date' => $validated['start_date'] ?? null,
-            'end_date' => $validated['end_date'] ?? null,
-            'is_active' => $validated['is_active'] ?? true,
-            'category' => $validated['category'] ?? null,
-            'priority' => $validated['priority'] ?? 0
-        ]);
+        $advertisement->update($validated);
 
         return redirect()->route('dashboard.advertisements')
             ->with('success', 'Advertisement updated successfully.');
@@ -147,9 +132,12 @@ class AdvertisementController extends Controller
      */
     public function destroy(Advertisement $advertisement)
     {
-        $this->authorize('delete', $advertisement);
+        // Ensure the user can only delete their own advertisements
+        if (Gate::denies('delete', $advertisement)) {
+            abort(403, 'You are not authorized to delete this advertisement.');
+        }
 
-        // Delete advertisement image
+        // Delete image if exists
         if ($advertisement->image_path) {
             Storage::disk('public')->delete($advertisement->image_path);
         }

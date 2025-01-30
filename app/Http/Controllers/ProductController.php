@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Order;
-use App\Models\Category; // Added Category model
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -53,62 +54,46 @@ class ProductController extends Controller
 
     /**
      * Show the form for creating a new product.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        // Fetch all categories
         $categories = Category::all();
-
-        // If no categories exist, create some default categories
-        if ($categories->isEmpty()) {
-            $defaultCategories = [
-                ['name' => 'Electronics', 'description' => 'Electronic devices and gadgets'],
-                ['name' => 'Clothing', 'description' => 'Apparel and fashion items'],
-                ['name' => 'Home & Kitchen', 'description' => 'Home appliances and kitchen tools'],
-                ['name' => 'Books', 'description' => 'Books and reading materials'],
-                ['name' => 'Sports & Outdoors', 'description' => 'Sports equipment and outdoor gear']
-            ];
-
-            foreach ($defaultCategories as $categoryData) {
-                Category::create($categoryData);
-            }
-
-            $categories = Category::all();
-        }
-
         return view('products.create', compact('categories'));
     }
 
     /**
-     * Display the specified product.
+     * Store a newly created product in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function store(Request $request)
     {
-        return view('products.show', compact('product'));
-    }
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|max:2048',
+            'featured' => 'boolean',
+            'discount' => 'nullable|numeric|min:0|max:100',
+        ]);
 
-    /**
-     * Show the form for editing the specified product.
-     */
-    public function edit(Product $product)
-    {
-        return view('products.edit', compact('product'));
-    }
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+            $validated['image_path'] = $imagePath;
+        }
 
-    /**
-     * Display analytics for the specified product.
-     */
-    public function analytics(Product $product)
-    {
-        // Fetch product-specific analytics
-        $sales = Order::whereHas('items', function($query) use ($product) {
-            $query->where('product_id', $product->id);
-        })->count();
+        // Add user_id
+        $validated['user_id'] = Auth::id();
 
-        $revenue = Order::whereHas('items', function($query) use ($product) {
-            $query->where('product_id', $product->id);
-        })->sum('total_amount');
+        $product = Product::create($validated);
 
-        return view('products.analytics', compact('product', 'sales', 'revenue'));
+        return redirect()->route('products.index')
+            ->with('success', 'Product created successfully.');
     }
 }

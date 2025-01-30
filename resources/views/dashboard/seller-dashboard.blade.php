@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller Dashboard - AdRetail Pro</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{asset('styles.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -95,11 +95,7 @@
                     </a>
                 </li>
                
-                <a href="settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
+                
             </ul>
         </aside>
 

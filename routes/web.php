@@ -6,8 +6,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\BlogController;
 use App\Http\Controllers\AdvertisementController;
+use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Product;
 use App\Models\Order;
@@ -36,26 +36,6 @@ Route::middleware(['auth'])->group(function () {
                 ->get();
             $customerFeedback = 4.8;
             
-            // Get top products
-            $topProducts = collect(); // Default to empty collection
-            try {
-                $topProducts = Product::withCount('orderItems as sales')
-                    ->orderBy('sales', 'desc')
-                    ->take(3)
-                    ->get()
-                    ->map(function($product) {
-                        $product->stock_percentage = $product->stock > 0 
-                            ? min(100, ($product->stock / 100) * 100) 
-                            : 0;
-                        $product->rating = 4.5; // Placeholder rating
-                        $product->image_url = $product->image ?? 'https://via.placeholder.com/400x300';
-                        return $product;
-                    });
-            } catch (\Exception $e) {
-                // Log the error if needed
-                \Log::error('Error fetching top products: ' . $e->getMessage());
-            }
-
             // Get chart data
             $startDate = Carbon::now()->subDays(6);
             $salesData = Order::where('created_at', '>=', $startDate)
@@ -68,8 +48,7 @@ Route::middleware(['auth'])->group(function () {
                 'totalOrders',
                 'recentOrders',
                 'customerFeedback',
-                'salesData',
-                'topProducts'
+                'salesData'
             ));
         } else {
             // Prepare data for buyer dashboard
@@ -101,43 +80,17 @@ Route::middleware(['auth'])->group(function () {
         }
     })->name('dashboard');
 
-    // Seller Dashboard Routes
-    Route::middleware(['auth'])->group(function () {
-        // Blog Routes
-        Route::get('/dashboard/blogs', [BlogController::class, 'index'])->name('dashboard.blogs');
-        Route::get('/dashboard/blogs/create', [BlogController::class, 'create'])->name('dashboard.blogs.create');
-        Route::post('/dashboard/blogs', [BlogController::class, 'store'])->name('dashboard.blogs.store');
-        Route::get('/dashboard/blogs/{blog}/edit', [BlogController::class, 'edit'])->name('dashboard.blogs.edit');
-        Route::put('/dashboard/blogs/{blog}', [BlogController::class, 'update'])->name('dashboard.blogs.update');
-        Route::delete('/dashboard/blogs/{blog}', [BlogController::class, 'destroy'])->name('dashboard.blogs.destroy');
-
-        // Advertisement Routes
-        Route::get('/dashboard/advertisements', [AdvertisementController::class, 'index'])->name('dashboard.advertisements');
-        Route::get('/dashboard/advertisements/create', [AdvertisementController::class, 'create'])->name('dashboard.advertisements.create');
-        Route::post('/dashboard/advertisements', [AdvertisementController::class, 'store'])->name('dashboard.advertisements.store');
-        Route::get('/dashboard/advertisements/{advertisement}/edit', [AdvertisementController::class, 'edit'])->name('dashboard.advertisements.edit');
-        Route::put('/dashboard/advertisements/{advertisement}', [AdvertisementController::class, 'update'])->name('dashboard.advertisements.update');
-        Route::delete('/dashboard/advertisements/{advertisement}', [AdvertisementController::class, 'destroy'])->name('dashboard.advertisements.destroy');
-    });
-
-    // Blog Routes
-    Route::get('/blog', [BlogController::class, 'blogIndex'])->name('blog.index');
-    Route::get('/blog/{blog:slug}', [BlogController::class, 'show'])->name('blog.show');
-
     // Products
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/search', [ProductController::class, 'search'])->name('search');
-    Route::get('/products/featured', [ProductController::class, 'getFeatured'])->name('products.featured');
-    Route::get('/products/deals', [ProductController::class, 'getDeals'])->name('products.deals');
-
-    // Product Routes
-    Route::prefix('products')->group(function () {
+    Route::prefix('products')->middleware(['auth'])->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/search', [ProductController::class, 'search'])->name('products.search');
+        Route::get('/featured', [ProductController::class, 'getFeatured'])->name('products.featured');
+        Route::get('/deals', [ProductController::class, 'getDeals'])->name('products.deals');
         Route::get('/create', [ProductController::class, 'create'])->name('products.create');
-        Route::post('/store', [ProductController::class, 'store'])->name('products.store');
-        Route::get('/{product}', [ProductController::class, 'show'])->name('products.show');
+        Route::post('/', [ProductController::class, 'store'])->name('products.store');
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
         Route::put('/{product}', [ProductController::class, 'update'])->name('products.update');
-        Route::get('/{product}/analytics', [ProductController::class, 'analytics'])->name('products.analytics');
+        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     });
 
     // Cart
@@ -168,25 +121,21 @@ Route::middleware(['auth'])->group(function () {
     // Contact
     Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 
-    // Blog Routes
-    Route::prefix('dashboard/blogs')->group(function () {
-        Route::get('/', [BlogController::class, 'index'])->name('dashboard.blogs');
-        Route::get('/create', [BlogController::class, 'create'])->name('dashboard.blogs.create');
-        Route::post('/', [BlogController::class, 'store'])->name('dashboard.blogs.store');
-        Route::get('/{blog}/edit', [BlogController::class, 'edit'])->name('dashboard.blogs.edit');
-        Route::put('/{blog}', [BlogController::class, 'update'])->name('dashboard.blogs.update');
-        Route::delete('/{blog}', [BlogController::class, 'destroy'])->name('dashboard.blogs.destroy');
-    });
+    // Advertisements
+    Route::get('/dashboard/advertisements', [AdvertisementController::class, 'index'])->name('dashboard.advertisements');
+    Route::get('/dashboard/advertisements/create', [AdvertisementController::class, 'create'])->name('dashboard.advertisements.create');
+    Route::post('/dashboard/advertisements', [AdvertisementController::class, 'store'])->name('dashboard.advertisements.store');
+    Route::get('/dashboard/advertisements/{advertisement}/edit', [AdvertisementController::class, 'edit'])->name('dashboard.advertisements.edit');
+    Route::put('/dashboard/advertisements/{advertisement}', [AdvertisementController::class, 'update'])->name('dashboard.advertisements.update');
+    Route::delete('/dashboard/advertisements/{advertisement}', [AdvertisementController::class, 'destroy'])->name('dashboard.advertisements.destroy');
 
-    // Advertisement Routes
-    Route::prefix('dashboard/advertisements')->group(function () {
-        Route::get('/', [AdvertisementController::class, 'index'])->name('dashboard.advertisements');
-        Route::get('/create', [AdvertisementController::class, 'create'])->name('dashboard.advertisements.create');
-        Route::post('/', [AdvertisementController::class, 'store'])->name('dashboard.advertisements.store');
-        Route::get('/{advertisement}/edit', [AdvertisementController::class, 'edit'])->name('dashboard.advertisements.edit');
-        Route::put('/{advertisement}', [AdvertisementController::class, 'update'])->name('dashboard.advertisements.update');
-        Route::delete('/{advertisement}', [AdvertisementController::class, 'destroy'])->name('dashboard.advertisements.destroy');
-    });
+    // Blogs
+    Route::get('/dashboard/blogs', [BlogController::class, 'index'])->name('dashboard.blogs');
+    Route::get('/dashboard/blogs/create', [BlogController::class, 'create'])->name('dashboard.blogs.create');
+    Route::post('/dashboard/blogs', [BlogController::class, 'store'])->name('dashboard.blogs.store');
+    Route::get('/dashboard/blogs/{blog}/edit', [BlogController::class, 'edit'])->name('dashboard.blogs.edit');
+    Route::put('/dashboard/blogs/{blog}', [BlogController::class, 'update'])->name('dashboard.blogs.update');
+    Route::delete('/dashboard/blogs/{blog}', [BlogController::class, 'destroy'])->name('dashboard.blogs.destroy');
 });
 
 require __DIR__.'/auth.php';

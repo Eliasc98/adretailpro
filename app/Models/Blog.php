@@ -4,13 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class Blog extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -18,14 +16,16 @@ class Blog extends Model
      * @var array
      */
     protected $fillable = [
-        'author_id',
-        'title',
-        'slug',
-        'content',
-        'featured_image',
+        'title', 
+        'content', 
+        'slug', 
+        'image_path', 
+        'author_id', 
+        'category_id', 
+        'published_at', 
+        'is_featured',
         'meta_description',
-        'status',
-        'published_at'
+        'meta_keywords'
     ];
 
     /**
@@ -35,41 +35,23 @@ class Blog extends Model
      */
     protected $casts = [
         'published_at' => 'datetime',
+        'is_featured' => 'boolean',
     ];
 
     /**
-     * Automatically generate a slug when creating or updating a blog
+     * Get the route key for the model.
+     *
+     * @return string
      */
-    public static function boot()
+    public function getRouteKeyName()
     {
-        parent::boot();
-
-        static::creating(function ($blog) {
-            $blog->slug = Str::slug($blog->title);
-            
-            // Set published_at if status is published and not already set
-            if ($blog->status === 'published' && !$blog->published_at) {
-                $blog->published_at = now();
-            }
-        });
-
-        static::updating(function ($blog) {
-            // Regenerate slug if title changes
-            if ($blog->isDirty('title')) {
-                $blog->slug = Str::slug($blog->title);
-            }
-
-            // Set or reset published_at based on status
-            if ($blog->status === 'published' && !$blog->published_at) {
-                $blog->published_at = now();
-            } elseif ($blog->status === 'draft') {
-                $blog->published_at = null;
-            }
-        });
+        return 'slug';
     }
 
     /**
-     * Relationship with User (Author)
+     * Relationship: Blog belongs to an Author (User)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function author()
     {
@@ -77,44 +59,66 @@ class Blog extends Model
     }
 
     /**
-     * Scope for published blogs
+     * Relationship: Blog belongs to a Category
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Relationship: Blog has many Comments
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments()
+    {
+        return $this->hasMany(BlogComment::class);
+    }
+
+    /**
+     * Scope a query to only include published blogs.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopePublished($query)
     {
-        return $query->where('status', 'published')
-                     ->whereNotNull('published_at')
-                     ->where('published_at', '<=', now());
+        return $query->whereNotNull('published_at')
+                     ->where('published_at', '<=', Carbon::now());
     }
 
     /**
-     * Scope for blogs by a specific author
+     * Scope a query to only include featured blogs.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeByAuthor($query, $authorId)
+    public function scopeFeatured($query)
     {
-        return $query->where('author_id', $authorId);
+        return $query->where('is_featured', true);
     }
 
     /**
-     * Accessor for blog excerpt
+     * Get the excerpt of the blog content.
+     *
+     * @param  int  $length
+     * @return string
      */
-    public function getExcerptAttribute()
+    public function getExcerpt($length = 150)
     {
-        return Str::limit(strip_tags($this->content), 150);
+        return substr(strip_tags($this->content), 0, $length) . '...';
     }
 
     /**
-     * Accessor for formatted published date
+     * Determine if the blog is published.
+     *
+     * @return bool
      */
-    public function getFormattedPublishedDateAttribute()
+    public function isPublished()
     {
-        return $this->published_at ? $this->published_at->format('F d, Y') : null;
-    }
-
-    /**
-     * Accessor for featured image URL
-     */
-    public function getFeaturedImageUrlAttribute()
-    {
-        return $this->featured_image ? asset('storage/' . $this->featured_image) : null;
+        return $this->published_at !== null && $this->published_at <= Carbon::now();
     }
 }

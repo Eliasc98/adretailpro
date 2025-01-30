@@ -10,38 +10,29 @@ class AdvertisementPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user)
-    {
-        return true;
-    }
-
-    public function view(User $user, Advertisement $advertisement)
-    {
-        return $user->id === $advertisement->user_id;
-    }
-
-    public function create(User $user)
-    {
-        return true;
-    }
-
+    /**
+     * Determine whether the user can update the advertisement.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Advertisement  $advertisement
+     * @return mixed
+     */
     public function update(User $user, Advertisement $advertisement)
     {
+        // Only allow the user who created the advertisement to update it
         return $user->id === $advertisement->user_id;
     }
 
+    /**
+     * Determine whether the user can delete the advertisement.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Advertisement  $advertisement
+     * @return mixed
+     */
     public function delete(User $user, Advertisement $advertisement)
     {
-        return $user->id === $advertisement->user_id;
-    }
-
-    public function restore(User $user, Advertisement $advertisement)
-    {
-        return $user->id === $advertisement->user_id;
-    }
-
-    public function forceDelete(User $user, Advertisement $advertisement)
-    {
+        // Only allow the user who created the advertisement to delete it
         return $user->id === $advertisement->user_id;
     }
 }
